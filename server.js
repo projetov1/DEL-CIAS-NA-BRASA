@@ -83,7 +83,7 @@ const CARDAPIO = {
     { id:'e4', nome:'Toscana de Bode (unid.)',    preco:8.00,  desc:'Unidade de toscana de bode',           ic:'🌭' },
     { id:'e5', nome:'Toscana Frango/Porco (unid)',preco:5.00,  desc:'Unidade de toscana de frango ou porco',ic:'🌭' },
   ],
-  almoco: [
+  almoco1: [
     { id:'al1', nome:'Comercial Picanha c/ fritas', preco:54.00, desc:'Feijão tropeiro ou caseiro, arroz, batata', ic:'🍱' },
     { id:'al2', nome:'Comercial Picanha',            preco:52.00, desc:'Feijão tropeiro ou caseiro, arroz, batata', ic:'🍱' },
     { id:'al3', nome:'Comercial Maminha',            preco:46.00, desc:'Feijão tropeiro ou caseiro, arroz, batata', ic:'🍱' },
@@ -92,6 +92,38 @@ const CARDAPIO = {
     { id:'al6', nome:'Comercial Picanha simples',    preco:29.00, desc:'Feijão tropeiro ou caseiro, arroz, batata', ic:'🍱' },
     { id:'al7', nome:'Comercial Galeto',             preco:29.00, desc:'Feijão tropeiro ou caseiro, arroz, batata', ic:'🍱' },
     { id:'al8', nome:'Comercial Toscana',            preco:29.00, desc:'Feijão tropeiro ou caseiro, arroz, batata', ic:'🍱' },
+  ],
+  almoco2: [
+    { id:'am1',  nome:'1/2 Picanha Argentina',  preco:140.00, desc:'Feijão tropeiro ou caseiro, arroz, batata', ic:'🍱' },
+    { id:'am2',  nome:'1/2 Picanha de Cordeiro',preco:129.00, desc:'Feijão tropeiro ou caseiro, arroz, batata', ic:'🍱' },
+    { id:'am3',  nome:'1/2 Churrasco Gaúcho',   preco:85.00,  desc:'Feijão tropeiro ou caseiro, arroz, batata', ic:'🍱' },
+    { id:'am4',  nome:'1/2 Maminha',            preco:107.00, desc:'Feijão tropeiro ou caseiro, arroz, batata', ic:'🍱' },
+    { id:'am5',  nome:'1/2 Mistão',             preco:90.00,  desc:'Feijão tropeiro ou caseiro, arroz, batata', ic:'🍱' },
+    { id:'am6',  nome:'1/2 Carne de Sol',       preco:83.00,  desc:'Feijão tropeiro ou caseiro, arroz, batata', ic:'🍱' },
+    { id:'am7',  nome:'1/2 Carne de Cordeiro',  preco:105.00, desc:'Feijão tropeiro ou caseiro, arroz, batata', ic:'🍱' },
+    { id:'am8',  nome:'1/2 Cupim',              preco:80.00,  desc:'Feijão tropeiro ou caseiro, arroz, batata', ic:'🍱' },
+    { id:'am9',  nome:'1/2 Costela de Bode',    preco:77.00,  desc:'Feijão tropeiro ou caseiro, arroz, batata', ic:'🍱' },
+    { id:'am10', nome:'1/2 Costela Bovina',     preco:75.00,  desc:'Feijão tropeiro ou caseiro, arroz, batata', ic:'🍱' },
+    { id:'am11', nome:'1/2 Picanha Suína',      preco:75.00,  desc:'Feijão tropeiro ou caseiro, arroz, batata', ic:'🍱' },
+    { id:'am12', nome:'1/2 Galeto',             preco:55.00,  desc:'Feijão tropeiro ou caseiro, arroz, batata', ic:'🍱' },
+  ],
+  petiscos: [
+    { id:'pt1',  nome:'Picanha com Fritas',          preco:145.00, desc:'Vinagrete, batata frita e farofa',  ic:'🍟' },
+    { id:'pt2',  nome:'Picanha de Cordeiro c/ Fritas',preco:140.00,desc:'Batata frita, vinagrete e farofa', ic:'🍟' },
+    { id:'pt3',  nome:'Mistão Simples c/ Fritas',    preco:108.00, desc:'Batata frita, vinagrete e farofa', ic:'🍟' },
+    { id:'pt4',  nome:'Maminha com Fritas',          preco:112.00, desc:'Vinagrete, batata frita e farofa', ic:'🍟' },
+    { id:'pt5',  nome:'Churrasco de Filé c/ Fritas', preco:108.00, desc:'Batata frita, vinagrete e farofa', ic:'🍟' },
+    { id:'pt6',  nome:'1/2 Picanha Simples c/ Fritas',preco:110.00,desc:'Vinagrete, batata frita e farofa', ic:'🍟' },
+    { id:'pt7',  nome:'Carne de Sol do Cord. c/ Fritas',preco:105.00,desc:'Vinagrete, batata frita e farofa',ic:'🍟' },
+    { id:'pt8',  nome:'1/2 Maminha com Fritas',      preco:86.00,  desc:'Vinagrete, batata frita e farofa', ic:'🍟' },
+    { id:'pt9',  nome:'Cupim com Fritas',            preco:82.00,  desc:'Vinagrete, batata frita e farofa', ic:'🍟' },
+    { id:'pt10', nome:'Costela de Bovina c/ Fritas', preco:80.00,  desc:'Batata frita, vinagrete e farofa', ic:'🍟' },
+    { id:'pt11', nome:'Carne de Sol com Fritas',     preco:80.00,  desc:'Batata frita, vinagrete e farofa', ic:'🍟' },
+    { id:'pt12', nome:'Costela de Bode c/ Fritas',   preco:77.00,  desc:'Batata frita, vinagrete e farofa', ic:'🍟' },
+    { id:'pt13', nome:'Picanha Suína com Fritas',    preco:73.00,  desc:'Batata frita, vinagrete e farofa', ic:'🍟' },
+    { id:'pt14', nome:'1/2 Carne de Sol c/ Fritas',  preco:65.00,  desc:'Vinagrete, batata frita e farofa', ic:'🍟' },
+    { id:'pt15', nome:'Comercial de Maminha',        preco:39.00,  desc:'Batata frita, vinagrete e farofa', ic:'🍟' },
+    { id:'pt16', nome:'Comercial de Carne',          preco:25.00,  desc:'Batata frita, vinagrete e farofa', ic:'🍟' },
   ],
 };
 
@@ -158,13 +190,15 @@ async function enviarCategorias(phone) {
     '1️⃣ 🥩 Churrascos\n' +
     '2️⃣ 🍗 Aves\n' +
     '3️⃣ 🍽️ Filé\n' +
-    '4️⃣ 🍟 Entradas\n' +
-    '5️⃣ 🍱 Almoços (por pessoa)'
+    '4️⃣ 🥗 Entradas\n' +
+    '5️⃣ 🍱 Almoços (1 pessoa)\n' +
+    '6️⃣ 🍱 Almoços (2 pessoas)\n' +
+    '7️⃣ 🍟 Petiscos'
   );
 }
 
 async function enviarItens(phone, cat) {
-  const nomes = { churrasco:'🥩 CHURRASCOS', aves:'🍗 AVES', file:'🍽️ FILÉ', entradas:'🍟 ENTRADAS', almoco:'🍱 ALMOÇOS' };
+  const nomes = { churrasco:'🥩 CHURRASCOS', aves:'🍗 AVES', file:'🍽️ FILÉ', entradas:'🥗 ENTRADAS', almoco1:'🍱 ALMOÇOS (1 pessoa)', almoco2:'🍱 ALMOÇOS (2 pessoas)', petiscos:'🍟 PETISCOS' };
   const itens = CARDAPIO[cat];
   const lista = itens.map((it,i)=>`${i+1}️⃣ *${it.nome}* — ${fmt(it.preco)}\n   ${it.desc}`).join('\n\n');
   await enviar(phone, `*${nomes[cat]}*\n\n${lista}\n\n${itens.length+1}️⃣ ⬅️ Outras categorias`);
@@ -175,8 +209,9 @@ async function enviarPagamentos(phone) {
     'Qual vai ser a *forma de pagamento*? 💳\n\n' +
     '1️⃣ ⚡ PIX\n' +
     '2️⃣ 💵 Dinheiro\n' +
-    '3️⃣ 💳 Cartão Débito\n' +
-    '4️⃣ 💳 Cartão Crédito'
+    '3️⃣ 💳 Cartão Crédito (Visa/Master/Hipercard)\n' +
+    '4️⃣ 💳 Cartão Débito (Visa/Master)\n' +
+    '5️⃣ 🍽️ Vale Alimentação (VR/Vale Card/Policard)'
   );
 }
 
@@ -295,8 +330,10 @@ async function processarMensagem(phone, texto) {
       else if (msg==='2') { s.catAtual='aves';      s.etapa='escolher_item'; await enviarItens(phone,'aves'); }
       else if (msg==='3') { s.catAtual='file';      s.etapa='escolher_item'; await enviarItens(phone,'file'); }
       else if (msg==='4') { s.catAtual='entradas';  s.etapa='escolher_item'; await enviarItens(phone,'entradas'); }
-      else if (msg==='5') { s.catAtual='almoco';    s.etapa='escolher_item'; await enviarItens(phone,'almoco'); }
-      else { await enviar(phone,'❓ Digite um número de 1 a 5.'); await enviarCategorias(phone); }
+      else if (msg==='5') { s.catAtual='almoco1';   s.etapa='escolher_item'; await enviarItens(phone,'almoco1'); }
+      else if (msg==='6') { s.catAtual='almoco2';   s.etapa='escolher_item'; await enviarItens(phone,'almoco2'); }
+      else if (msg==='7') { s.catAtual='petiscos';  s.etapa='escolher_item'; await enviarItens(phone,'petiscos'); }
+      else { await enviar(phone,'❓ Digite um número de 1 a 7.'); await enviarCategorias(phone); }
       break;
 
     /* ── Item ── */
@@ -319,9 +356,11 @@ async function processarMensagem(phone, texto) {
           `1️⃣ 🥩 Churrascos\n` +
           `2️⃣ 🍗 Aves\n` +
           `3️⃣ 🍽️ Filé\n` +
-          `4️⃣ 🍟 Entradas\n` +
-          `5️⃣ 🍱 Almoços\n` +
-          `6️⃣ ✅ Finalizar pedido`
+          `4️⃣ 🥗 Entradas\n` +
+          `5️⃣ 🍱 Almoços (1 pessoa)\n` +
+          `6️⃣ 🍱 Almoços (2 pessoas)\n` +
+          `7️⃣ 🍟 Petiscos\n` +
+          `8️⃣ ✅ Finalizar pedido`
         );
       } else {
         await enviar(phone,'❓ Número inválido. Escolha um item da lista.');
@@ -336,12 +375,14 @@ async function processarMensagem(phone, texto) {
       else if (msg==='2') { s.catAtual='aves';      s.etapa='escolher_item'; await enviarItens(phone,'aves'); }
       else if (msg==='3') { s.catAtual='file';      s.etapa='escolher_item'; await enviarItens(phone,'file'); }
       else if (msg==='4') { s.catAtual='entradas';  s.etapa='escolher_item'; await enviarItens(phone,'entradas'); }
-      else if (msg==='5') { s.catAtual='almoco';    s.etapa='escolher_item'; await enviarItens(phone,'almoco'); }
-      else if (msg==='6') {
+      else if (msg==='5') { s.catAtual='almoco1';   s.etapa='escolher_item'; await enviarItens(phone,'almoco1'); }
+      else if (msg==='6') { s.catAtual='almoco2';   s.etapa='escolher_item'; await enviarItens(phone,'almoco2'); }
+      else if (msg==='7') { s.catAtual='petiscos';  s.etapa='escolher_item'; await enviarItens(phone,'petiscos'); }
+      else if (msg==='8') {
         s.etapa = 'aguardando_nome';
         await enviar(phone,'Ótimo! 😄\n\nAgora me diz: qual é o seu *nome completo*?');
       }
-      else { await enviar(phone,'❓ Digite um número de 1 a 6.'); }
+      else { await enviar(phone,'❓ Digite um número de 1 a 8.'); }
       break;
 
     /* ── Nome ── */
@@ -402,13 +443,13 @@ async function processarMensagem(phone, texto) {
 
     /* ── Pagamento ── */
     case 'escolher_pgto': {
-      const pgtos = ['PIX','Dinheiro','Cartão Débito','Cartão Crédito'];
+      const pgtos = ['PIX','Dinheiro','Cartão Crédito','Cartão Débito','Vale Alimentação'];
       const idx   = parseInt(msg) - 1;
       if (idx >= 0 && idx < pgtos.length) {
         s.pgto = pgtos[idx];
         if (msg === '2') {
           s.etapa = 'aguardando_troco';
-          await enviar(phone,'💵 Vai precisar de *troco*?\n\nSe sim, para quanto? (ex: 100,00)\nSe não precisar, responda *não*');
+          await enviar(phone,'💵 Vai precisar de *troco*?\n\nSe sim, para quanto? (ex: 50,00)\nSe não precisar, responda *não*');
         } else {
           s.etapa = 'confirmar';
           await enviarResumo(phone, s);
