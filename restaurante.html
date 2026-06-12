@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Churrascaria & Pizzaria — Sistema</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;}
+    .bbl{border-radius:4px 18px 18px 18px;}
+    .bbr{border-radius:18px 4px 18px 18px;}
+    .scr::-webkit-scrollbar{width:3px;}
+    .scr::-webkit-scrollbar-thumb{background:#ccc;border-radius:9px;}
+    @keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .fi{animation:up .2s ease;}
+    @keyframes pd{0%,100%{opacity:1}50%{opacity:.35}}
+    .pd{animation:pd 1.4s infinite;}
+    .wa-bg{background-color:#ECE5DD;background-image:url("data:image/svg+xml,%3Csvg width='52' height='52' viewBox='0 0 52 52' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23b2aaa3' fill-opacity='0.12'%3E%3Cpath d='M26 26m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0'/%3E%3C/g%3E%3C/svg%3E");}
+  </style>
+</head>
+<body class="bg-slate-100">
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+/* ─── CONFIG ─── */
+const WA = '5581992194757';
+const fmt = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const hora = () => new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+
+/* ─── DADOS ─── */
+const CARDAPIO = {
+  churrasco:[
+    {id:'c1',nome:'Picanha na Brasa',     preco:89.90,desc:'400g com farofa e vinagrete',         ic:'🥩'},
+    {id:'c2',nome:'Costelinha Suína',     preco:72.00,desc:'350g temperada com ervas',             ic:'🍖'},
+    {id:'c3',nome:'Fraldinha Grelhada',  preco:67.50,desc:'300g com mandioca frita',              ic:'🔥'},
+    {id:'c4',nome:'Combo Família',        preco:199.00,desc:'1kg misto + 4 acompanhamentos',      ic:'🫕'},
+  ],
+  pizza:[
+    {id:'p1',nome:'Calabresa',            preco:52.00,desc:'Molho, mozzarella, calabresa, cebola',ic:'🍕'},
+    {id:'p2',nome:'Frango c/ Catupiry',   preco:58.00,desc:'Mozzarella, frango, catupiry',        ic:'🐔'},
+    {id:'p3',nome:'Portuguesa',           preco:55.00,desc:'Ovo, presunto, azeitona, mozzarella', ic:'🫒'},
+    {id:'p4',nome:'Quatro Queijos',       preco:62.00,desc:'Mozz, gorgonzola, provolone, parmesão',ic:'🧀'},
+    {id:'p5',nome:'Margherita',           preco:48.00,desc:'Molho fresco, búfala, manjericão',    ic:'🌿'},
+  ],
+  bebidas:[
+    {id:'b1',nome:'Refrigerante 2L',      preco:12.00,desc:'Coca, Guaraná ou Laranja',            ic:'🥤'},
+    {id:'b2',nome:'Suco Natural 500ml',   preco:14.00,desc:'Maracujá, Laranja ou Limão',          ic:'🍊'},
+    {id:'b3',nome:'Cerveja Long Neck',    preco:10.00,desc:'Heineken, Brahma ou Itaipava',         ic:'🍺'},
+    {id:'b4',nome:'Água Mineral 500ml',   preco:5.00, desc:'Com ou sem gás',                      ic:'💧'},
+  ],
+};
+
+const BAIRROS = [
+  {nome:'Centro',         taxa:5.00, tempo:'30–40 min'},
+  {nome:'Boa Viagem',     taxa:7.00, tempo:'35–45 min'},
+  {nome:'Afogados',       taxa:7.00, tempo:'35–45 min'},
+  {nome:'Imbiribeira',    taxa:8.00, tempo:'40–50 min'},
+  {nome:'Ibura',          taxa:10.00,tempo:'45–55 min'},
+  {nome:'Outro bairro',   taxa:8.00, tempo:'40–50 min'},
+];
+
+const PGTOS = [
+  {label:'PIX',           ic:'⚡',key:'pix'},
+  {label:'Dinheiro',      ic:'💵',key:'dinheiro'},
+  {label:'Cartão Débito', ic:'💳',key:'debito'},
+  {label:'Cartão Crédito',ic:'💳',key:'credito'},
+];
+
+const STATUS = {
+  aguardando:{label:'Aguardando', bg:'bg-amber-100', tx:'text-amber-800', dot:'bg-amber-400'},
+  preparo:   {label:'Em Preparo', bg:'bg-blue-100',  tx:'text-blue-800',  dot:'bg-blue-500 pd'},
+  pronto:    {label:'Pronto',     bg:'bg-emerald-100',tx:'text-emerald-800',dot:'bg-emerald-500'},
+  entregue:  {label:'Entregue',   bg:'bg-slate-100', tx:'text-slate-500', dot:'bg-slate-400'},
+};
+
+const PEDIDOS_DEMO = [
+  {id:1,cliente:'João Silva',  itens:['Picanha na Brasa','Refrigerante 2L'],       total:101.90,status:'pronto',    hora:'11:32',tipo:'churrasco',entrega:'Delivery',bairro:'Centro',pgto:'PIX'},
+  {id:2,cliente:'Maria Souza', itens:['Pizza Calabresa','Cerveja Long Neck'],       total:62.00, status:'preparo',   hora:'11:45',tipo:'pizza',    entrega:'Delivery',bairro:'Boa Viagem',pgto:'Cartão Débito'},
+  {id:3,cliente:'Carlos Lima', itens:['Combo Família','Suco Natural 500ml'],        total:213.00,status:'aguardando',hora:'11:58',tipo:'churrasco',entrega:'Retirada', bairro:'',pgto:'Dinheiro'},
+  {id:4,cliente:'Ana Ferreira',itens:['Pizza Quatro Queijos'],                      total:62.00, status:'entregue',  hora:'11:15',tipo:'pizza',    entrega:'Retirada', bairro:'',pgto:'PIX'},
+  {id:5,cliente:'Pedro Rocha', itens:['Fraldinha Grelhada','Água Mineral 500ml'],   total:72.50, status:'pronto',    hora:'12:02',tipo:'churrasco',entrega:'Delivery',bairro:'Afogados',pgto:'PIX'},
+];
+
+/* ─── ÍCONES SVG ─── */
+const Ic = {
+  Flame:(p)=><svg {...p} viewBox="0 0 24 24" fill="currentColor"><path d="M12 23a7 7 0 0 1-5-11.95A7 7 0 0 0 19 12c0-2.12-.94-4.02-2.44-5.34C15.55 5.82 14 4.5 14 3c0 0-2.5 2.5-2 5.5-1.5-1.5-2-3.5-2-3.5C8.5 7 8 10 9.5 12.5 8.5 12 8 11 8 11c-.5 1.5-.5 3 0 4.5A7 7 0 0 1 12 23z"/></svg>,
+  Grid:(p)=><svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>,
+  List:(p)=><svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>,
+  Money:(p)=><svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v2m0 8v2m-4-5h8"/></svg>,
+  Clip:(p)=><svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>,
+  Pizza:(p)=><svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2 2 19.5h20L12 2z"/><path d="M12 2v17.5M2 19.5l10-10 10 10"/></svg>,
+  Grill:(p)=><svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9h18M3 9a9 9 0 0 0 18 0M12 18v3M8 21h8M12 2v2M8 4l1 2M16 4l-1 2"/></svg>,
+  WA:(p)=><svg {...p} viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm.01 1.67c2.2 0 4.26.86 5.82 2.42a8.23 8.23 0 0 1 2.41 5.83c0 4.54-3.7 8.23-8.24 8.23-1.48 0-2.93-.39-4.19-1.15l-.3-.17-3.12.82.83-3.04-.2-.32a8.19 8.19 0 0 1-1.26-4.38c.01-4.54 3.7-8.24 8.25-8.24zM8.53 7.33c-.16 0-.43.06-.66.31-.22.25-.87.86-.87 2.07 0 1.22.89 2.39 1 2.56.14.17 1.76 2.67 4.25 3.73.59.27 1.05.42 1.41.53.59.19 1.13.16 1.56.1.48-.07 1.46-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.07-.1-.23-.16-.48-.27-.25-.14-1.47-.74-1.69-.82-.23-.08-.37-.12-.56.12-.16.25-.64.82-.78.99-.15.16-.29.18-.54.06-.25-.15-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.44.13-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.11-.56-1.35-.77-1.84-.2-.48-.41-.42-.56-.43-.15 0-.31-.01-.48-.01z"/></svg>,
+  Chat:(p)=><svg {...p} viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.37 5.08L2 22l4.92-1.37A9.95 9.95 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zM8 13a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm4 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm4 0a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/></svg>,
+  X:(p)=><svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>,
+  Arr:(p)=><svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>,
+  Send:(p)=><svg {...p} viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"/></svg>,
+  Pin:(p)=><svg {...p} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>,
+};
+
+/* ─── STATUS BADGE ─── */
+function Badge({status}){
+  const c = STATUS[status]||STATUS.aguardando;
+  return <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${c.bg} ${c.tx}`}>
+    <span className={`w-1.5 h-1.5 rounded-full ${c.dot}`}/>
+    {c.label}
+  </span>;
+}
+
+/* ─── KPI CARD ─── */
+function KpiCard({IC,label,value,sub,grad}){
+  return <div className="bg-white rounded-2xl shadow-sm p-5 flex items-center gap-4 border border-white">
+    <div className={`w-14 h-14 rounded-xl ${grad} flex items-center justify-center shadow-md shrink-0`}>
+      <IC className="w-7 h-7 text-white"/>
+    </div>
+    <div className="min-w-0">
+      <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">{label}</p>
+      <p className="text-2xl font-bold text-slate-800">{value}</p>
+      {sub&&<p className="text-xs text-slate-400 mt-0.5">{sub}</p>}
+    </div>
+  </div>;
+}
+
+/* ─── CARD DE PEDIDO ─── */
+function PedidoCard({p,onStatus}){
+  const prox={aguardando:'preparo',preparo:'pronto',pronto:'entregue'};
+  const btnLbl={aguardando:'Iniciar preparo',preparo:'Marcar pronto',pronto:'Entregar'};
+  const btnCl={aguardando:'bg-blue-500 hover:bg-blue-600',preparo:'bg-emerald-500 hover:bg-emerald-600',pronto:'bg-slate-600 hover:bg-slate-700'};
+  return <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-4 flex flex-col gap-3">
+    <div className="flex items-start justify-between gap-2">
+      <div>
+        <p className="font-semibold text-slate-800 text-sm">{p.cliente}</p>
+        <p className="text-xs text-slate-400 mt-0.5">
+          <span className="font-mono">#{String(p.id).padStart(4,'0')}</span> · {p.hora}
+          {p.entrega&&<span className="ml-1">· {p.entrega}{p.bairro?` (${p.bairro})`:''}</span>}
+        </p>
+      </div>
+      <Badge status={p.status}/>
+    </div>
+    <ul className="space-y-1">
+      {p.itens.map((it,i)=><li key={i} className="text-sm text-slate-600 flex items-center gap-2">
+        <span className="w-1 h-1 rounded-full bg-orange-400 shrink-0"/>
+        {it}
+      </li>)}
+    </ul>
+    <div className="flex items-center justify-between pt-2 border-t border-slate-50">
+      <div>
+        <span className="font-bold text-orange-600 text-base">{fmt(p.total)}</span>
+        {p.pgto&&<span className="ml-2 text-xs text-slate-400">{p.pgto}</span>}
+      </div>
+      {prox[p.status]&&<button onClick={()=>onStatus(p.id,prox[p.status])}
+        className={`flex items-center gap-1.5 text-xs text-white px-3 py-1.5 rounded-lg transition font-medium ${btnCl[p.status]}`}>
+        {btnLbl[p.status]}<Ic.Arr className="w-3.5 h-3.5"/>
+      </button>}
+    </div>
+  </div>;
+}
+
+/* ─── DASHBOARD ─── */
+function Dashboard({pedidos,onStatus}){
+  const ativos   =pedidos.filter(p=>p.status!=='entregue');
+  const entregues=pedidos.filter(p=>p.status==='entregue');
+  const total    =pedidos.reduce((s,p)=>s+p.total,0);
+  const pizzas   =pedidos.filter(p=>p.tipo==='pizza').length;
+  const churras  =pedidos.filter(p=>p.tipo==='churrasco').length;
+  const upd=(id,st)=>onStatus(id,st);
+  return <div className="space-y-6">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <KpiCard IC={Ic.Money} label="Faturamento Hoje" value={fmt(total)}      sub="todos os pedidos"       grad="bg-gradient-to-br from-emerald-400 to-emerald-600"/>
+      <KpiCard IC={Ic.Clip}  label="Pedidos Ativos"   value={ativos.length}   sub={`${entregues.length} entregues`} grad="bg-gradient-to-br from-orange-400 to-orange-600"/>
+      <KpiCard IC={Ic.Pizza} label="Pizzas Hoje"      value={pizzas}          sub="pedidos com pizza"      grad="bg-gradient-to-br from-red-400 to-red-600"/>
+      <KpiCard IC={Ic.Grill} label="Churrascos Hoje"  value={churras}         sub="pedidos com churrasco"  grad="bg-gradient-to-br from-amber-400 to-amber-600"/>
+    </div>
+    <section>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-base font-bold text-slate-700">Pedidos em Andamento</h2>
+        <span className="text-xs bg-orange-100 text-orange-700 font-semibold px-2.5 py-1 rounded-full">{ativos.length} ativos</span>
+      </div>
+      {ativos.length===0
+        ?<div className="bg-white rounded-2xl border border-dashed border-slate-200 py-12 text-center text-slate-400 text-sm">Nenhum pedido ativo no momento.</div>
+        :<div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">{ativos.map(p=><PedidoCard key={p.id} p={p} onStatus={upd}/>)}</div>}
+    </section>
+    {entregues.length>0&&<section>
+      <h2 className="text-base font-bold text-slate-700 mb-4">Entregues Hoje</h2>
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 divide-y divide-slate-50">
+        {entregues.map(p=><div key={p.id} className="flex items-center justify-between px-5 py-3 gap-4">
+          <div className="min-w-0">
+            <p className="font-medium text-slate-700 text-sm truncate">{p.cliente}</p>
+            <p className="text-xs text-slate-400 truncate">{p.itens.join(', ')}</p>
+          </div>
+          <div className="text-right shrink-0">
+            <p className="font-semibold text-slate-700 text-sm">{fmt(p.total)}</p>
+            <Badge status="entregue"/>
+          </div>
+        </div>)}
+      </div>
+    </section>}
+  </div>;
+}
+
+/* ─── CARDÁPIO ─── */
+function Cardapio(){
+  const [cat,setCat]=useState('churrasco');
+  const cats=[
+    {k:'churrasco',l:'Churrasco',IC:Ic.Grill},
+    {k:'pizza',    l:'Pizza',    IC:Ic.Pizza},
+    {k:'bebidas',  l:'Bebidas',  IC:Ic.Clip},
+  ];
+  const cores={churrasco:'border-orange-200 bg-orange-50',pizza:'border-red-200 bg-red-50',bebidas:'border-sky-200 bg-sky-50'};
+  return <div className="space-y-5">
+    <div className="flex gap-2 bg-white rounded-2xl p-1.5 shadow-sm border border-slate-100 w-fit">
+      {cats.map(({k,l,IC})=><button key={k} onClick={()=>setCat(k)}
+        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${cat===k?'bg-orange-500 text-white shadow':'text-slate-500 hover:text-orange-500'}`}>
+        <IC className="w-4 h-4"/>{l}
+      </button>)}
+    </div>
+    <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+      {CARDAPIO[cat].map(it=><div key={it.id} className={`bg-white rounded-2xl border shadow-sm p-5 flex gap-4 items-center hover:shadow-md transition-shadow ${cores[cat]}`}>
+        <div className={`w-14 h-14 rounded-xl border flex items-center justify-center text-3xl shrink-0 ${cores[cat]}`}>{it.ic}</div>
+        <div className="min-w-0">
+          <p className="font-semibold text-slate-800 text-sm">{it.nome}</p>
+          <p className="text-xs text-slate-400 mt-0.5">{it.desc}</p>
+          <p className="text-orange-600 font-bold mt-2">{fmt(it.preco)}</p>
+        </div>
+      </div>)}
+    </div>
+  </div>;
+}
+
+/* ══════════════════════════════════════════════
+   CHATBOT  —  Fluxo completo estilo WhatsApp
+   useRef para o pedido = sem stale closure
+══════════════════════════════════════════════ */
+function ChatBot({onNovoPedido}){
+  const [open,setOpen]           = useState(false);
+  const [msgs,setMsgs]           = useState([]);
+  const [opcoes,setOpcoes]       = useState([]);        // botões ativos
+  const [inputMode,setInputMode] = useState(null);      // {hint, resolve}
+  const [inputVal,setInputVal]   = useState('');
+  const pedidoRef                = useRef({nome:'',entrega:'',bairro:null,endereco:'',carrinho:[],pgto:'',troco:''});
+  const endRef                   = useRef(null);
+  const resolveRef               = useRef(null);        // guarda o resolve do input
+
+  useEffect(()=>endRef.current?.scrollIntoView({behavior:'smooth'}),[msgs,opcoes]);
+
+  /* helpers */
+  const bot = useCallback((txt,ops=[])=>{
+    setMsgs(p=>[...p,{id:Date.now()+Math.random(),de:'bot',txt}]);
+    setOpcoes(ops);
+  },[]);
+  const user = useCallback((txt)=>{
+    setMsgs(p=>[...p,{id:Date.now()+Math.random(),de:'user',txt}]);
+    setOpcoes([]);
+  },[]);
+
+  /* Pede texto livre, retorna Promise */
+  const askInput = useCallback((hint)=>new Promise(res=>{
+    resolveRef.current = res;
+    setInputMode(hint);
+    setOpcoes([]);
+  }),[]);
+
+  const submitInput = useCallback(()=>{
+    const v = inputVal.trim();
+    if(!v||!resolveRef.current) return;
+    setInputVal('');
+    setInputMode(null);
+    resolveRef.current(v);
+    resolveRef.current = null;
+  },[inputVal]);
+
+  /* delay util */
+  const delay = ms=>new Promise(r=>setTimeout(r,ms));
+
+  /* ══ FLUXO PRINCIPAL ══ */
+  const iniciar = useCallback(async()=>{
+    const p = pedidoRef.current;
+    p.nome=''; p.entrega=''; p.bairro=null; p.endereco=''; p.carrinho=[]; p.pgto=''; p.troco='';
+
+    await delay(200);
+    bot(
+      'Olá! 👋 Seja muito bem-vindo(a) à\n*Delícias na Brasa!* 🔥🍕\n\nComo posso te ajudar hoje?',
+      [
+        {l:'🛒 Fazer um pedido',         fn:()=>fluxoPedido()},
+        {l:'📋 Ver cardápio completo',   fn:()=>verCardapio()},
+        {l:'🕐 Horário de funcionamento',fn:()=>verHorario()},
+        {l:'📍 Endereço / Localização',  fn:()=>verEndereco()},
+      ]
+    );
+  },[]);
+
+  /* ── INFO ── */
+  const verCardapio = useCallback(async()=>{
+    user('📋 Ver cardápio completo');
+    await delay(300);
+    const linhas = cat => CARDAPIO[cat].map(i=>`${i.ic} *${i.nome}* — ${fmt(i.preco)}\n   ${i.desc}`).join('\n');
+    bot(`*📋 Cardápio Completo*\n\n*🥩 CHURRASCO*\n${linhas('churrasco')}\n\n*🍕 PIZZA*\n${linhas('pizza')}\n\n*🥤 BEBIDAS*\n${linhas('bebidas')}`,
+      [{l:'🛒 Quero fazer um pedido!',fn:()=>fluxoPedido()},{l:'🏠 Voltar',fn:()=>iniciar()}]);
+  },[]);
+
+  const verHorario = useCallback(async()=>{
+    user('🕐 Horário de funcionamento');
+    await delay(300);
+    bot('*⏰ Horário de Funcionamento*\n\nSeg a Sex: 11h às 23h\nSáb e Dom: 11h à meia-noite\n\nEstamos abertos todos os dias! 🎉',
+      [{l:'🛒 Fazer pedido',fn:()=>fluxoPedido()},{l:'🏠 Voltar',fn:()=>iniciar()}]);
+  },[]);
+
+  const verEndereco = useCallback(async()=>{
+    user('📍 Endereço / Localização');
+    await delay(300);
+    bot('*📍 Onde nos encontrar*\n\nRua das Brasas, 420 – Centro, Recife/PE\n📞 (81) 99219-4757\n📸 @churrascariadoze\n\n🛵 Fazemos delivery para vários bairros!',
+      [{l:'🛒 Fazer pedido',fn:()=>fluxoPedido()},{l:'🏠 Voltar',fn:()=>iniciar()}]);
+  },[]);
+
+  /* ══ FLUXO DO PEDIDO ══ */
+  const fluxoPedido = useCallback(async()=>{
+    const p = pedidoRef.current;
+
+    /* 1. Nome */
+    user('🛒 Fazer um pedido');
+    await delay(300);
+    bot('Ótimo! 😄 Vamos montar seu pedido!\n\nPrimeiro, qual é o seu *nome completo*?');
+    const nome = await askInput('Seu nome completo…');
+    p.nome = nome;
+    user(nome);
+
+    /* 2. Tipo de entrega */
+    await delay(300);
+    bot(`Perfeito, *${nome}*! 👍\n\nVocê prefere *delivery* ou vai *retirar* no local?`,[
+      {l:'🛵 Delivery (entrega em casa)',fn:()=>escolherBairro()},
+      {l:'🏃 Retirada no local',         fn:()=>{ p.entrega='Retirada'; user('🏃 Retirada no local'); escolherCategoria(); }},
+    ]);
+  },[askInput]);
+
+  /* ── Bairro ── */
+  const escolherBairro = useCallback(async()=>{
+    user('🛵 Delivery');
+    const p = pedidoRef.current;
+    p.entrega = 'Delivery';
+    await delay(300);
+    bot('Qual é o seu *bairro*?\n\nA taxa de entrega varia conforme a região:',
+      BAIRROS.map(b=>({l:`📍 ${b.nome} — taxa ${fmt(b.taxa)}`,fn:async()=>{
+        p.bairro = b;
+        user(`📍 ${b.nome}`);
+        await delay(300);
+        bot(`*Taxa de entrega:* ${fmt(b.taxa)}\n*Tempo estimado:* ${b.tempo} ⏰\n\nAgora me informe o *endereço completo*\n(rua, número, complemento, ponto de referência)`);
+        const end = await askInput('Rua, número, complemento…');
+        p.endereco = end;
+        user(end);
+        await delay(300);
+        escolherCategoria();
+      }}))
+    );
+  },[askInput]);
+
+  /* ── Categoria ── */
+  const escolherCategoria = useCallback(async()=>{
+    await delay(200);
+    bot('O que você vai querer hoje? 😋',[
+      {l:'🥩 Churrasco',fn:()=>listarItens('churrasco')},
+      {l:'🍕 Pizza',    fn:()=>listarItens('pizza')},
+      {l:'🥤 Bebidas',  fn:()=>listarItens('bebidas')},
+    ]);
+  },[]);
+
+  /* ── Listar itens ── */
+  const listarItens = useCallback(async(cat)=>{
+    const nomes={churrasco:'🥩 Churrasco',pizza:'🍕 Pizza',bebidas:'🥤 Bebidas'};
+    user(nomes[cat]);
+    await delay(300);
+    const itens = CARDAPIO[cat];
+    bot(`*${nomes[cat]}* — toque para adicionar ao pedido:`,[
+      ...itens.map(it=>({l:`${it.ic} ${it.nome} — ${fmt(it.preco)}`,fn:()=>adicionarItem(it)})),
+      {l:'⬅️ Outras categorias',fn:()=>escolherCategoria()},
+    ]);
+  },[]);
+
+  /* ── Adicionar item ── */
+  const adicionarItem = useCallback(async(it)=>{
+    const p = pedidoRef.current;
+    p.carrinho = [...p.carrinho, it];
+    user(`${it.ic} ${it.nome}`);
+    await delay(300);
+    const subtotal = p.carrinho.reduce((s,i)=>s+i.preco,0);
+    const lista = p.carrinho.map(i=>`${i.ic} ${i.nome} — ${fmt(i.preco)}`).join('\n');
+    bot(`Adicionado! ✅\n\n*Carrinho atual:*\n${lista}\n\n*Subtotal: ${fmt(subtotal)}*\n\nDeseja mais algum item?`,[
+      {l:'🥩 Mais churrasco',  fn:()=>listarItens('churrasco')},
+      {l:'🍕 Mais pizza',      fn:()=>listarItens('pizza')},
+      {l:'🥤 Bebidas',         fn:()=>listarItens('bebidas')},
+      {l:'✅ Finalizar pedido', fn:()=>escolherPagamento()},
+    ]);
+  },[]);
+
+  /* ── Pagamento ── */
+  const escolherPagamento = useCallback(async()=>{
+    user('✅ Finalizar pedido');
+    await delay(300);
+    bot('Qual vai ser a *forma de pagamento*? 💳',
+      PGTOS.map(pg=>({l:`${pg.ic} ${pg.label}`,fn:async()=>{
+        const p = pedidoRef.current;
+        p.pgto = pg.label;
+        user(`${pg.ic} ${pg.label}`);
+        if(pg.key==='dinheiro'){
+          await delay(300);
+          bot('Vai precisar de *troco*?',[
+            {l:'💵 Sim, preciso de troco', fn:async()=>{
+              user('💵 Sim, preciso de troco');
+              await delay(300);
+              bot('Troco para quanto? (ex: 100,00)');
+              const troco = await askInput('Troco para R$…');
+              p.troco = troco;
+              user(`Troco para R$ ${troco}`);
+              await delay(300);
+              mostrarResumo();
+            }},
+            {l:'Não preciso de troco',fn:()=>{ p.troco=''; user('Sem troco'); mostrarResumo(); }},
+          ]);
+        } else {
+          await delay(300);
+          mostrarResumo();
+        }
+      }}))
+    );
+  },[askInput]);
+
+  /* ── Resumo ── */
+  const mostrarResumo = useCallback(async()=>{
+    const p = pedidoRef.current;
+    const subtotal = p.carrinho.reduce((s,i)=>s+i.preco,0);
+    const taxa = p.bairro?.taxa??0;
+    const total = subtotal+taxa;
+    const lista = p.carrinho.map(i=>`• ${i.ic} ${i.nome} — ${fmt(i.preco)}`).join('\n');
+    const entInfo = p.entrega==='Delivery'
+      ? `🛵 Delivery — ${p.bairro?.nome}\n📌 ${p.endereco}\n💰 Taxa: ${fmt(taxa)}`
+      : '🏃 Retirada no local';
+    const trocoInfo = p.troco?`\n🔄 Troco para R$ ${p.troco}`:'';
+
+    bot(
+      `*📋 RESUMO DO PEDIDO*\n\n*Cliente:* ${p.nome}\n\n*Itens:*\n${lista}\n\n*Subtotal:* ${fmt(subtotal)}\n${entInfo}\n\n*💳 Pagamento:* ${p.pgto}${trocoInfo}\n\n*🏷 TOTAL: ${fmt(total)}*\n\n*Confirma o pedido?*`,[
+      {l:'✅ SIM, confirmar pedido!',fn:()=>confirmar(total,taxa)},
+      {l:'❌ Cancelar',             fn:()=>iniciar()},
+    ]);
+  },[]);
+
+  /* ── Confirmar ── */
+  const confirmar = useCallback(async(total,taxa)=>{
+    user('✅ SIM, confirmar pedido!');
+    const p = pedidoRef.current;
+    const subtotal = p.carrinho.reduce((s,i)=>s+i.preco,0);
+
+    const novoPedido = {
+      id: Date.now(),
+      cliente: p.nome,
+      itens: p.carrinho.map(i=>i.nome),
+      total,
+      status:'aguardando',
+      hora: hora(),
+      tipo: p.carrinho.some(i=>i.id.startsWith('p'))?'pizza':'churrasco',
+      entrega: p.entrega,
+      bairro: p.bairro?.nome||'',
+      pgto: p.pgto,
+    };
+    onNovoPedido(novoPedido);
+
+    /* Link WhatsApp com resumo do pedido */
+    const lista = p.carrinho.map(i=>`• ${i.ic} ${i.nome} — ${fmt(i.preco)}`).join('\n');
+    const waTexto = [
+      `*✅ PEDIDO CONFIRMADO — Delícias na Brasa*`,
+      ``,`*Cliente:* ${p.nome}`,
+      ``,`*Itens:*`,lista,
+      ``,`*Total: ${fmt(total)}*`,
+      p.entrega==='Delivery'?`*Entrega:* ${p.bairro?.nome} — taxa ${fmt(taxa)}\n*Endereço:* ${p.endereco}`:`*Retirada no local*`,
+      `*Pagamento:* ${p.pgto}`,p.troco?`*Troco:* R$ ${p.troco}`:'',
+      ``,`*⏰ ${p.bairro?.tempo||'30–45 min'}*`,
+      ``,`Obrigado pela preferência! 🔥🍕🥩`,
+    ].filter(l=>l!==undefined).join('\n');
+    const waLink = `https://wa.me/${WA}?text=${encodeURIComponent(waTexto)}`;
+
+    await delay(300);
+    setMsgs(prev=>[...prev,{
+      id:Date.now()+Math.random(), de:'bot',
+      txt:`*Pedido registrado!* 🎉\n\nNúmero: *#${String(novoPedido.id).slice(-4)}*\n⏰ ${p.bairro?.tempo||'30–45 min'}\n\nClique abaixo para confirmar pelo WhatsApp e acompanhar seu pedido! 👇`,
+      waLink,
+    }]);
+    setOpcoes([{l:'🛒 Fazer outro pedido',fn:()=>iniciar()},{l:'🏠 Menu inicial',fn:()=>iniciar()}]);
+  },[onNovoPedido]);
+
+  /* abrir/fechar */
+  const abrirChat = ()=>{
+    if(!open && msgs.length===0) iniciar();
+    setOpen(o=>!o);
+  };
+
+  /* renderizar bold + quebras de linha */
+  const renderTxt = (txt)=>txt.split('\n').map((ln,i)=>{
+    const parts = ln.split(/(\*[^*]+\*)/g);
+    return <p key={i} className={i>0?'mt-0.5':''}>{parts.map((pt,j)=>
+      pt.startsWith('*')&&pt.endsWith('*')
+        ?<strong key={j}>{pt.slice(1,-1)}</strong>
+        :pt
+    )}</p>;
+  });
+
+  return <>
+    {/* Botão chat */}
+    <button onClick={abrirChat}
+      className="fixed bottom-24 right-6 w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full shadow-2xl flex items-center justify-center z-50 hover:scale-110 transition-all">
+      {open?<Ic.X className="w-5 h-5 text-white"/>:<Ic.Chat className="w-6 h-6 text-white"/>}
+      {!open&&<span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full ring-2 ring-white pd"/>}
+    </button>
+
+    {/* Botão WhatsApp fixo */}
+    <a href={`https://wa.me/${WA}`} target="_blank" rel="noreferrer"
+      className="fixed bottom-6 right-6 w-14 h-14 bg-[#25D366] rounded-full shadow-2xl flex items-center justify-center z-50 hover:scale-110 transition-all hover:bg-[#1ead55]">
+      <Ic.WA className="w-7 h-7 text-white"/>
+    </a>
+
+    {/* Janela do chat */}
+    {open&&<div className="fixed bottom-40 right-6 w-[370px] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden z-50 fi"
+      style={{maxHeight:'calc(100vh - 190px)'}}>
+
+      {/* Header estilo WhatsApp */}
+      <div className="bg-[#075E54] px-4 py-3 text-white shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center shrink-0">
+            <Ic.Grill className="w-5 h-5 text-white"/>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-sm">Delícias na Brasa</p>
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full pd"/>
+              <p className="text-xs text-green-200">online agora</p>
+            </div>
+          </div>
+          <a href={`https://wa.me/${WA}`} target="_blank" rel="noreferrer"
+            className="bg-white/15 hover:bg-white/25 rounded-full p-2 transition" title="Abrir WhatsApp">
+            <Ic.WA className="w-4 h-4 text-white"/>
+          </a>
+        </div>
+      </div>
+
+      {/* Mensagens */}
+      <div className="flex-1 overflow-y-auto scr p-3 space-y-2 wa-bg" style={{minHeight:180}}>
+        {msgs.map(m=><div key={m.id} className={`flex ${m.de==='user'?'justify-end':'justify-start'} fi`}>
+          <div className="max-w-[85%] flex flex-col gap-2">
+            <div className={`px-3 py-2 text-sm leading-relaxed shadow-sm ${m.de==='user'?'bg-[#DCF8C6] text-slate-800 bbr':'bg-white text-slate-800 bbl'}`}>
+              {renderTxt(m.txt)}
+              <p className={`text-[10px] mt-1 text-right ${m.de==='user'?'text-green-600':'text-slate-400'}`}>
+                {hora()}{m.de==='user'?' ✓✓':''}
+              </p>
+            </div>
+            {m.waLink&&<a href={m.waLink} target="_blank" rel="noreferrer"
+              className="flex items-center gap-2 bg-[#25D366] hover:bg-[#1ead55] text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-sm">
+              <Ic.WA className="w-4 h-4"/>Confirmar & acompanhar no WhatsApp
+            </a>}
+          </div>
+        </div>)}
+        <div ref={endRef}/>
+      </div>
+
+      {/* Botões de opção */}
+      {opcoes.length>0&&<div className="shrink-0 bg-[#F0F0F0] border-t border-slate-200 p-2 flex flex-wrap gap-1.5">
+        {opcoes.map((op,i)=><button key={i} onClick={op.fn}
+          className="bg-white border border-slate-300 hover:bg-[#25D366] hover:text-white hover:border-[#25D366] text-slate-700 text-xs px-3 py-1.5 rounded-full transition font-medium shadow-sm">
+          {op.l}
+        </button>)}
+      </div>}
+
+      {/* Input de texto */}
+      <div className={`shrink-0 flex items-center gap-2 px-2 py-2 bg-[#F0F0F0] ${opcoes.length>0?'':'border-t border-slate-200'}`}>
+        <input value={inputVal} onChange={e=>setInputVal(e.target.value)}
+          onKeyDown={e=>e.key==='Enter'&&inputMode&&submitInput()}
+          placeholder={inputMode||'Selecione uma opção acima…'}
+          disabled={!inputMode}
+          className="flex-1 bg-white border border-slate-200 rounded-full px-4 py-2 text-sm outline-none focus:border-[#25D366] disabled:opacity-40 disabled:cursor-not-allowed"/>
+        <button onClick={submitInput} disabled={!inputMode||!inputVal.trim()}
+          className="w-9 h-9 bg-[#25D366] hover:bg-[#1ead55] disabled:bg-slate-300 text-white rounded-full flex items-center justify-center transition shrink-0">
+          <Ic.Send className="w-4 h-4"/>
+        </button>
+      </div>
+    </div>}
+  </>;
+}
+
+/* ─── APP ─── */
+function App(){
+  const [pedidos,setPedidos]=useState(PEDIDOS_DEMO);
+  const [pag,setPag]=useState('dashboard');
+  const [wsStatus,setWsStatus]=useState('conectando'); // conectando | ok | erro
+
+  /* WebSocket — sincroniza com o servidor em tempo real */
+  useEffect(()=>{
+    const proto = location.protocol==='https:'?'wss':'ws';
+    const ws = new WebSocket(`${proto}://${location.host}`);
+
+    ws.onopen = ()=>{ setWsStatus('ok'); };
+    ws.onclose= ()=>{ setWsStatus('erro'); };
+    ws.onerror= ()=>{ setWsStatus('erro'); };
+
+    ws.onmessage = e=>{
+      const d = JSON.parse(e.data);
+      if(d.tipo==='pedidos_atuais') setPedidos(d.pedidos);
+      if(d.tipo==='novo_pedido')    setPedidos(p=>[d.pedido,...p]);
+      if(d.tipo==='status_atualizado')
+        setPedidos(p=>p.map(x=>x.id===d.id?{...x,status:d.status}:x));
+    };
+
+    return ()=>ws.close();
+  },[]);
+
+  /* Atualiza status via API (notifica cliente no WhatsApp automaticamente) */
+  const atualizarStatus = async (id, status)=>{
+    setPedidos(p=>p.map(x=>x.id===id?{...x,status}:x)); // otimista
+    try{ await fetch(`/api/pedido/${id}/status`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status})}); }
+    catch(e){ console.error(e); }
+  };
+
+  return <div className="min-h-screen bg-slate-100 flex flex-col">
+    <header className="bg-gradient-to-r from-orange-600 via-orange-500 to-red-600 text-white shadow-lg shrink-0">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
+        <div className="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
+          <Ic.Flame className="w-5 h-5 text-white"/>
+        </div>
+        <div className="min-w-0">
+          <h1 className="text-base font-bold leading-tight">Churrascaria &amp; Pizzaria do Zé</h1>
+          <div className="flex items-center gap-1.5">
+            <span className={`w-1.5 h-1.5 rounded-full ${wsStatus==='ok'?'bg-emerald-400 pd':wsStatus==='erro'?'bg-red-400':'bg-yellow-400 pd'}`}/>
+            <p className="text-xs text-orange-200">
+              {wsStatus==='ok'?'Bot conectado':wsStatus==='erro'?'Bot desconectado':'Conectando…'}
+            </p>
+          </div>
+        </div>
+        <nav className="ml-auto flex gap-1">
+          {[{id:'dashboard',l:'Dashboard',IC:Ic.Grid},{id:'cardapio',l:'Cardápio',IC:Ic.List}].map(n=>
+            <button key={n.id} onClick={()=>setPag(n.id)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition ${pag===n.id?'bg-white text-orange-600 shadow-sm':'text-white/80 hover:bg-white/15'}`}>
+              <n.IC className="w-4 h-4"/>
+              <span className="hidden sm:inline">{n.l}</span>
+            </button>)}
+        </nav>
+      </div>
+    </header>
+    <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-6">
+      {pag==='dashboard'&&<Dashboard pedidos={pedidos} onStatus={atualizarStatus}/>}
+      {pag==='cardapio'&&<Cardapio/>}
+    </main>
+    <ChatBot onNovoPedido={p=>setPedidos(prev=>[p,...prev])}/>
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

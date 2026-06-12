@@ -1,0 +1,475 @@
+require('dotenv').config();
+const express = require('express');
+const axios   = require('axios');
+const http    = require('http');
+const { WebSocketServer } = require('ws');
+const path    = require('path');
+
+const app    = express();
+const server = http.createServer(app);
+const wss    = new WebSocketServer({ server });
+
+app.use(express.json());
+app.use(express.static(path.join(__dirname)));
+
+/* ════════════════════════════════════════════
+   CONFIG Z-API
+════════════════════════════════════════════ */
+const INSTANCE  = process.env.ZAPI_INSTANCE;
+const TOKEN     = process.env.ZAPI_TOKEN;
+const CHAVE_PIX = process.env.CHAVE_PIX || '(81) 99219-4757';
+const ZAPI_BASE = `https://api.z-api.io/instances/${INSTANCE}/token/${TOKEN}`;
+
+async function enviar(phone, message) {
+  try {
+    await axios.post(`${ZAPI_BASE}/send-text`, { phone, message });
+    console.log(`✉️  [${phone}] → "${message.slice(0, 60).replace(/\n/g,' ')}…"`);
+  } catch (e) {
+    console.error(`❌ Erro ao enviar para ${phone}:`, e.response?.data || e.message);
+  }
+}
+
+/* ════════════════════════════════════════════
+   WEBSOCKET — atualiza dashboard em tempo real
+════════════════════════════════════════════ */
+const wsClients = new Set();
+
+wss.on('connection', ws => {
+  wsClients.add(ws);
+  ws.send(JSON.stringify({ tipo: 'pedidos_atuais', pedidos }));
+  ws.on('close', () => wsClients.delete(ws));
+});
+
+function broadcast(msg) {
+  const raw = JSON.stringify(msg);
+  wsClients.forEach(ws => ws.readyState === 1 && ws.send(raw));
+}
+
+/* ════════════════════════════════════════════
+   DADOS
+════════════════════════════════════════════ */
+const CARDAPIO = {
+  churrasco: [
+    { id:'c1', nome:'Picanha na Brasa',    preco:89.90, desc:'400g com farofa e vinagrete',          ic:'🥩' },
+    { id:'c2', nome:'Costelinha Suína',    preco:72.00, desc:'350g temperada com ervas',              ic:'🍖' },
+    { id:'c3', nome:'Fraldinha Grelhada', preco:67.50, desc:'300g com mandioca frita',               ic:'🔥' },
+    { id:'c4', nome:'Combo Família',       preco:199.00,desc:'1kg misto + 4 acompanhamentos',        ic:'🫕' },
+  ],
+  pizza: [
+    { id:'p1', nome:'Calabresa',           preco:52.00, desc:'Molho, mozzarella, calabresa, cebola', ic:'🍕' },
+    { id:'p2', nome:'Frango c/ Catupiry',  preco:58.00, desc:'Mozzarella, frango, catupiry',         ic:'🐔' },
+    { id:'p3', nome:'Portuguesa',          preco:55.00, desc:'Ovo, presunto, azeitona, mozzarella',  ic:'🫒' },
+    { id:'p4', nome:'Quatro Queijos',      preco:62.00, desc:'Mozz, gorgonzola, provolone, parmesão',ic:'🧀' },
+    { id:'p5', nome:'Margherita',          preco:48.00, desc:'Molho fresco, búfala, manjericão',     ic:'🌿' },
+  ],
+  bebidas: [
+    { id:'b1', nome:'Refrigerante 2L',     preco:12.00, desc:'Coca, Guaraná ou Laranja',             ic:'🥤' },
+    { id:'b2', nome:'Suco Natural 500ml',  preco:14.00, desc:'Maracujá, Laranja ou Limão',           ic:'🍊' },
+    { id:'b3', nome:'Cerveja Long Neck',   preco:10.00, desc:'Heineken, Brahma ou Itaipava',         ic:'🍺' },
+    { id:'b4', nome:'Água Mineral 500ml',  preco:5.00,  desc:'Com ou sem gás',                       ic:'💧' },
+  ],
+};
+
+const BAIRROS = [
+  { nome:'Centro',       taxa:5.00, tempo:'30–40 min' },
+  { nome:'Boa Viagem',   taxa:7.00, tempo:'35–45 min' },
+  { nome:'Afogados',     taxa:7.00, tempo:'35–45 min' },
+  { nome:'Imbiribeira',  taxa:8.00, tempo:'40–50 min' },
+  { nome:'Ibura',        taxa:10.00,tempo:'45–55 min' },
+  { nome:'Outro bairro', taxa:8.00, tempo:'40–50 min' },
+];
+
+const fmt = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+
+let pedidos     = [];
+let pedidoIdSeq = 1000;
+
+/* ════════════════════════════════════════════
+   ESTADO DAS CONVERSAS (por número de telefone)
+════════════════════════════════════════════ */
+const sessoes = new Map();
+
+function novaSessao() {
+  return {
+    etapa: 'menu_principal',
+    nome: '', entrega: '', bairro: null,
+    endereco: '', carrinho: [],
+    catAtual: null, pgto: '', troco: '',
+  };
+}
+
+/* ════════════════════════════════════════════
+   HELPERS DE MENSAGEM
+════════════════════════════════════════════ */
+async function enviarMenu(phone) {
+  const s = sessoes.get(phone) || novaSessao();
+  s.etapa = 'menu_principal';
+  sessoes.set(phone, s);
+  await enviar(phone,
+    '🔥 *Delícias na Brasa*\n\n' +
+    'Como posso te ajudar? Responda com o número:\n\n' +
+    '1️⃣ 🛒 Fazer um pedido\n' +
+    '2️⃣ 📋 Ver cardápio e preços\n' +
+    '3️⃣ 🕐 Horário de funcionamento\n' +
+    '4️⃣ 📍 Endereço / Contato'
+  );
+}
+
+async function enviarBairros(phone) {
+  const lista = BAIRROS.map((b,i)=>`${i+1}️⃣ *${b.nome}* — taxa ${fmt(b.taxa)} (${b.tempo})`).join('\n');
+  await enviar(phone, `📍 *Qual é o seu bairro?*\n\n${lista}`);
+}
+
+async function enviarCategorias(phone) {
+  await enviar(phone,
+    'O que você vai querer hoje? 😋\n\n' +
+    '1️⃣ 🥩 Churrasco\n' +
+    '2️⃣ 🍕 Pizza\n' +
+    '3️⃣ 🥤 Bebidas'
+  );
+}
+
+async function enviarItens(phone, cat) {
+  const nomes = { churrasco:'🥩 CHURRASCO', pizza:'🍕 PIZZA', bebidas:'🥤 BEBIDAS' };
+  const itens = CARDAPIO[cat];
+  const lista = itens.map((it,i)=>`${i+1}️⃣ *${it.nome}* — ${fmt(it.preco)}\n   ${it.desc}`).join('\n\n');
+  await enviar(phone, `*${nomes[cat]}*\n\n${lista}\n\n${itens.length+1}️⃣ ⬅️ Outras categorias`);
+}
+
+async function enviarPagamentos(phone) {
+  await enviar(phone,
+    'Qual vai ser a *forma de pagamento*? 💳\n\n' +
+    '1️⃣ ⚡ PIX\n' +
+    '2️⃣ 💵 Dinheiro\n' +
+    '3️⃣ 💳 Cartão Débito\n' +
+    '4️⃣ 💳 Cartão Crédito'
+  );
+}
+
+async function enviarResumo(phone, s) {
+  const subtotal = s.carrinho.reduce((t,i)=>t+i.preco,0);
+  const taxa     = s.bairro?.taxa ?? 0;
+  const total    = subtotal + taxa;
+  const lista    = s.carrinho.map(i=>`• ${i.ic} ${i.nome} — ${fmt(i.preco)}`).join('\n');
+  const entInfo  = s.entrega === 'Delivery'
+    ? `🛵 Delivery — *${s.bairro?.nome}*\n📌 ${s.endereco}\n💰 Taxa: *${fmt(taxa)}*`
+    : '🏃 Retirada no local';
+  const trocoInfo = s.troco ? `\n🔄 Troco para R$ ${s.troco}` : '';
+
+  await enviar(phone,
+    `📋 *RESUMO DO PEDIDO*\n\n` +
+    `*Cliente:* ${s.nome}\n\n` +
+    `*Itens:*\n${lista}\n\n` +
+    `*Subtotal:* ${fmt(subtotal)}\n` +
+    `${entInfo}\n\n` +
+    `*💳 Pagamento:* ${s.pgto}${trocoInfo}\n\n` +
+    `🏷 *TOTAL: ${fmt(total)}*\n\n` +
+    `*Confirma o pedido?*\n\n1️⃣ ✅ SIM, confirmar!\n2️⃣ ❌ Cancelar`
+  );
+}
+
+async function confirmarPedido(phone, s) {
+  const subtotal = s.carrinho.reduce((t,i)=>t+i.preco,0);
+  const taxa     = s.bairro?.taxa ?? 0;
+  const total    = subtotal + taxa;
+  const id       = ++pedidoIdSeq;
+
+  const pedido = {
+    id,
+    phone,
+    cliente: s.nome,
+    itens:   s.carrinho.map(i=>i.nome),
+    total,
+    status:  'aguardando',
+    hora:    new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),
+    tipo:    s.carrinho.some(i=>i.id.startsWith('p')) ? 'pizza' : 'churrasco',
+    entrega: s.entrega,
+    bairro:  s.bairro?.nome || '',
+    pgto:    s.pgto,
+  };
+
+  pedidos.unshift(pedido);
+  broadcast({ tipo:'novo_pedido', pedido });
+
+  const pixInfo = s.pgto === 'PIX'
+    ? `\n\n⚡ *Chave PIX:* ${CHAVE_PIX}\nApós o pagamento envie o comprovante aqui. ✅`
+    : '';
+
+  await enviar(phone,
+    `🎉 *Pedido confirmado, ${s.nome}!*\n\n` +
+    `*Número:* #${String(id).padStart(4,'0')}\n` +
+    `⏰ *Tempo estimado:* ${s.bairro?.tempo || '30–45 min'}` +
+    `${pixInfo}\n\n` +
+    `Em breve entraremos em contato! 🔥🍕🥩\n` +
+    `Obrigado pela preferência! 😊`
+  );
+
+  sessoes.set(phone, novaSessao());
+}
+
+/* ════════════════════════════════════════════
+   MÁQUINA DE ESTADOS
+════════════════════════════════════════════ */
+async function processarMensagem(phone, texto) {
+  const msg = texto.trim().toLowerCase();
+
+  if (!sessoes.has(phone)) sessoes.set(phone, novaSessao());
+  const s = sessoes.get(phone);
+
+  // Palavra-chave para reiniciar em qualquer etapa
+  if (['oi','olá','ola','opa','bom dia','boa tarde','boa noite','menu','início','inicio'].includes(msg)) {
+    sessoes.set(phone, novaSessao());
+    await enviarMenu(phone);
+    return;
+  }
+
+  console.log(`📱 [${phone}] etapa=${s.etapa} msg="${texto}"`);
+
+  switch (s.etapa) {
+
+    /* ── Menu principal ── */
+    case 'menu_principal':
+      if (msg==='1') {
+        s.etapa = 'aguardando_nome';
+        await enviar(phone,'Ótimo! 😄 Vamos montar seu pedido!\n\nQual é o seu *nome completo*?');
+      } else if (msg==='2') {
+        const lin = cat => CARDAPIO[cat].map(i=>`${i.ic} *${i.nome}* — ${fmt(i.preco)}\n   ${i.desc}`).join('\n');
+        await enviar(phone,
+          `📋 *Cardápio Completo*\n\n` +
+          `*🥩 CHURRASCO*\n${lin('churrasco')}\n\n` +
+          `*🍕 PIZZA*\n${lin('pizza')}\n\n` +
+          `*🥤 BEBIDAS*\n${lin('bebidas')}`
+        );
+        await enviarMenu(phone);
+      } else if (msg==='3') {
+        await enviar(phone,'⏰ *Horário de Funcionamento*\n\nSeg – Sex: 11h às 23h\nSáb e Dom: 11h à meia-noite\n\nEstamos abertos todos os dias! 🎉');
+        await enviarMenu(phone);
+      } else if (msg==='4') {
+        await enviar(phone,'📍 *Onde nos encontrar*\n\nRua das Brasas, 420 – Centro, Recife/PE\n📞 (81) 99219-4757\n📸 @churrascariadoze\n\n🛵 Fazemos delivery nos principais bairros!');
+        await enviarMenu(phone);
+      } else {
+        await enviarMenu(phone);
+      }
+      break;
+
+    /* ── Nome ── */
+    case 'aguardando_nome':
+      if (texto.length < 3) { await enviar(phone,'Por favor, informe seu nome completo.'); break; }
+      s.nome  = texto;
+      s.etapa = 'tipo_entrega';
+      await enviar(phone,
+        `Perfeito, *${texto}*! 👍\n\n` +
+        `Como prefere receber seu pedido?\n\n` +
+        `1️⃣ 🛵 Delivery (entrega em casa)\n` +
+        `2️⃣ 🏃 Retirada no local`
+      );
+      break;
+
+    /* ── Tipo de entrega ── */
+    case 'tipo_entrega':
+      if (msg==='1') {
+        s.entrega = 'Delivery';
+        s.etapa   = 'escolher_bairro';
+        await enviarBairros(phone);
+      } else if (msg==='2') {
+        s.entrega = 'Retirada';
+        s.etapa   = 'escolher_categoria';
+        await enviarCategorias(phone);
+      } else {
+        await enviar(phone,'❓ Digite *1* para Delivery ou *2* para Retirada.');
+      }
+      break;
+
+    /* ── Bairro ── */
+    case 'escolher_bairro': {
+      const idx = parseInt(msg) - 1;
+      if (idx >= 0 && idx < BAIRROS.length) {
+        s.bairro = BAIRROS[idx];
+        s.etapa  = 'aguardando_endereco';
+        await enviar(phone,
+          `✅ *${s.bairro.nome}* selecionado!\n` +
+          `💰 Taxa de entrega: *${fmt(s.bairro.taxa)}*\n` +
+          `⏰ Tempo estimado: *${s.bairro.tempo}*\n\n` +
+          `Agora me informe o *endereço completo*\n(rua, número, complemento e ponto de referência):`
+        );
+      } else {
+        await enviar(phone,'❓ Escolha um número válido da lista.');
+        await enviarBairros(phone);
+      }
+      break;
+    }
+
+    /* ── Endereço ── */
+    case 'aguardando_endereco':
+      if (texto.length < 5) { await enviar(phone,'Por favor, informe o endereço completo (rua, número, complemento).'); break; }
+      s.endereco = texto;
+      s.etapa    = 'escolher_categoria';
+      await enviar(phone,`📌 Endereço registrado:\n_${texto}_`);
+      await enviarCategorias(phone);
+      break;
+
+    /* ── Categoria ── */
+    case 'escolher_categoria':
+      if      (msg==='1') { s.catAtual='churrasco'; s.etapa='escolher_item'; await enviarItens(phone,'churrasco'); }
+      else if (msg==='2') { s.catAtual='pizza';     s.etapa='escolher_item'; await enviarItens(phone,'pizza'); }
+      else if (msg==='3') { s.catAtual='bebidas';   s.etapa='escolher_item'; await enviarItens(phone,'bebidas'); }
+      else { await enviar(phone,'❓ Digite 1, 2 ou 3.'); await enviarCategorias(phone); }
+      break;
+
+    /* ── Item ── */
+    case 'escolher_item': {
+      const itens = CARDAPIO[s.catAtual];
+      const idx   = parseInt(msg) - 1;
+      if (msg === String(itens.length + 1)) {
+        s.etapa = 'escolher_categoria';
+        await enviarCategorias(phone);
+      } else if (idx >= 0 && idx < itens.length) {
+        s.carrinho.push(itens[idx]);
+        s.etapa = 'adicionar_mais';
+        const sub  = s.carrinho.reduce((t,i)=>t+i.preco,0);
+        const lista= s.carrinho.map(i=>`• ${i.ic} ${i.nome} — ${fmt(i.preco)}`).join('\n');
+        await enviar(phone,
+          `✅ *${itens[idx].nome}* adicionado!\n\n` +
+          `🛒 *Carrinho:*\n${lista}\n\n` +
+          `*Subtotal: ${fmt(sub)}*\n\n` +
+          `Deseja mais algum item?\n\n` +
+          `1️⃣ 🥩 Mais churrasco\n` +
+          `2️⃣ 🍕 Mais pizza\n` +
+          `3️⃣ 🥤 Bebidas\n` +
+          `4️⃣ ✅ Finalizar pedido`
+        );
+      } else {
+        await enviar(phone,'❓ Número inválido. Escolha um item da lista.');
+        await enviarItens(phone, s.catAtual);
+      }
+      break;
+    }
+
+    /* ── Adicionar mais ── */
+    case 'adicionar_mais':
+      if      (msg==='1') { s.catAtual='churrasco'; s.etapa='escolher_item'; await enviarItens(phone,'churrasco'); }
+      else if (msg==='2') { s.catAtual='pizza';     s.etapa='escolher_item'; await enviarItens(phone,'pizza'); }
+      else if (msg==='3') { s.catAtual='bebidas';   s.etapa='escolher_item'; await enviarItens(phone,'bebidas'); }
+      else if (msg==='4') { s.etapa='escolher_pgto'; await enviarPagamentos(phone); }
+      else { await enviar(phone,'❓ Digite 1, 2, 3 ou 4.'); }
+      break;
+
+    /* ── Pagamento ── */
+    case 'escolher_pgto': {
+      const pgtos = ['PIX','Dinheiro','Cartão Débito','Cartão Crédito'];
+      const idx   = parseInt(msg) - 1;
+      if (idx >= 0 && idx < pgtos.length) {
+        s.pgto = pgtos[idx];
+        if (msg === '2') {
+          s.etapa = 'aguardando_troco';
+          await enviar(phone,'💵 Vai precisar de *troco*?\n\nSe sim, para quanto? (ex: 100,00)\nSe não precisar, responda *não*');
+        } else {
+          s.etapa = 'confirmar';
+          await enviarResumo(phone, s);
+        }
+      } else {
+        await enviar(phone,'❓ Escolha uma opção válida.'); await enviarPagamentos(phone);
+      }
+      break;
+    }
+
+    /* ── Troco ── */
+    case 'aguardando_troco':
+      s.troco = (['nao','não','n','nope'].includes(msg)) ? '' : texto;
+      s.etapa = 'confirmar';
+      await enviarResumo(phone, s);
+      break;
+
+    /* ── Confirmar ── */
+    case 'confirmar':
+      if (msg==='1') {
+        await confirmarPedido(phone, s);
+      } else if (msg==='2') {
+        sessoes.set(phone, novaSessao());
+        await enviar(phone,'❌ Pedido cancelado.\n\nSe precisar de algo, é só chamar! 😊');
+        await enviarMenu(phone);
+      } else {
+        await enviar(phone,'❓ Digite *1* para confirmar ou *2* para cancelar.');
+      }
+      break;
+
+    default:
+      await enviarMenu(phone);
+  }
+}
+
+/* ════════════════════════════════════════════
+   ROTAS
+════════════════════════════════════════════ */
+
+// Webhook Z-API — recebe mensagens dos clientes
+app.post('/webhook', async (req, res) => {
+  res.sendStatus(200); // responde rápido para o Z-API não retentar
+
+  const b = req.body;
+  if (b.fromMe || b.fromApi)          return; // ignora mensagens próprias
+  if (b.isGroup || b.isGroupMsg)      return; // ignora grupos
+  if (b.type !== 'ReceivedCallback' && b.type !== 'text') return;
+
+  const phone = b.phone;
+  const texto = b.text?.message || b.body || '';
+  if (!phone || !texto) return;
+
+  // Inicia com menu se sessão nova
+  if (!sessoes.has(phone)) {
+    sessoes.set(phone, novaSessao());
+    await enviarMenu(phone);
+    return;
+  }
+
+  await processarMensagem(phone, texto);
+});
+
+// Atualizar status de pedido (chamado pelo dashboard)
+app.post('/api/pedido/:id/status', async (req, res) => {
+  const id     = parseInt(req.params.id);
+  const status = req.body.status;
+  const pedido = pedidos.find(p => p.id === id);
+  if (!pedido) return res.status(404).json({ erro: 'Pedido não encontrado' });
+
+  pedido.status = status;
+  broadcast({ tipo: 'status_atualizado', id, status });
+
+  // Notifica o cliente no WhatsApp
+  const notif = {
+    preparo:  `👨‍🍳 *${pedido.cliente}*, seu pedido está sendo preparado agora! 🔥`,
+    pronto:   pedido.entrega === 'Delivery'
+                ? `🛵 *${pedido.cliente}*, seu pedido saiu para entrega! Chegará em instantes! ✅`
+                : `✅ *${pedido.cliente}*, seu pedido está pronto para retirada! Pode vir buscar! 🏃`,
+    entregue: `🎉 Obrigado, *${pedido.cliente}*! Pedido entregue com sucesso. Até a próxima! 😊`,
+  };
+
+  if (notif[status] && pedido.phone) {
+    await enviar(pedido.phone, notif[status]);
+  }
+
+  res.json({ ok: true });
+});
+
+// Retorna todos os pedidos (para sincronizar dashboard ao abrir)
+app.get('/api/pedidos', (req, res) => res.json(pedidos));
+
+// Serve o dashboard
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'restaurante.html')));
+
+/* ════════════════════════════════════════════
+   START
+════════════════════════════════════════════ */
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log('');
+  console.log('🔥 ═══════════════════════════════════════');
+  console.log('   Delícias na Brasa — Bot');
+  console.log('═══════════════════════════════════════ 🔥');
+  console.log(`\n✅ Servidor rodando em http://localhost:${PORT}`);
+  console.log(`📋 Dashboard:  http://localhost:${PORT}/`);
+  console.log(`🔗 Webhook:    http://SEU_IP:${PORT}/webhook`);
+  console.log(`\n📦 Z-API Instance: ${INSTANCE || '⚠️  NÃO CONFIGURADO'}`);
+  console.log(`\n💡 Configure o webhook no painel Z-API!`);
+  console.log('');
+});
