@@ -73,12 +73,11 @@ const CARDAPIO = {
 };
 
 const BAIRROS = [
-  { nome:'Centro',       taxa:5.00, tempo:'30–40 min' },
-  { nome:'Boa Viagem',   taxa:7.00, tempo:'35–45 min' },
-  { nome:'Afogados',     taxa:7.00, tempo:'35–45 min' },
-  { nome:'Imbiribeira',  taxa:8.00, tempo:'40–50 min' },
-  { nome:'Ibura',        taxa:10.00,tempo:'45–55 min' },
-  { nome:'Outro bairro', taxa:8.00, tempo:'40–50 min' },
+  { nome:'Cohab',         taxa:5.00, tempo:'20–30 min' },
+  { nome:'Bairro São Francisco', taxa:5.00, tempo:'20–30 min' },
+  { nome:'Vila Social',   taxa:5.00, tempo:'20–30 min' },
+  { nome:'Garapu',        taxa:7.00, tempo:'30–40 min' },
+  { nome:'Outro bairro (Cabo de Santo Agostinho)', taxa:8.00, tempo:'30–45 min' },
 ];
 
 const fmt = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
