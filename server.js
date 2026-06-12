@@ -107,6 +107,44 @@ const CARDAPIO = {
     { id:'am11', nome:'1/2 Picanha Suína',      preco:75.00,  desc:'Feijão tropeiro ou caseiro, arroz, batata', ic:'🍱' },
     { id:'am12', nome:'1/2 Galeto',             preco:55.00,  desc:'Feijão tropeiro ou caseiro, arroz, batata', ic:'🍱' },
   ],
+  pizzag: [
+    { id:'pg1',  nome:'Mussarela G',           preco:50.00, desc:'Tomate, azeitona e orégano',                          ic:'🍕' },
+    { id:'pg2',  nome:'Chester G',             preco:52.00, desc:'Queijo, azeitona e orégano',                          ic:'🍕' },
+    { id:'pg3',  nome:'Calabresa G',           preco:55.00, desc:'Queijo, cebola, azeitona e orégano',                  ic:'🍕' },
+    { id:'pg4',  nome:'Presunto G',            preco:52.00, desc:'Queijo, tomate, azeitona e orégano',                  ic:'🍕' },
+    { id:'pg5',  nome:'Salaminho G',           preco:54.00, desc:'Tomate, azeitona e orégano',                          ic:'🍕' },
+    { id:'pg6',  nome:'Provolone G',           preco:56.00, desc:'Queijo, tomate, azeitona e orégano',                  ic:'🍕' },
+    { id:'pg7',  nome:'Bacon G',               preco:58.00, desc:'Queijo, cebola, azeitona e orégano',                  ic:'🍕' },
+    { id:'pg8',  nome:'Frango G',              preco:59.00, desc:'Queijo, azeitona e orégano',                          ic:'🍕' },
+    { id:'pg9',  nome:'Sertaneja G',           preco:62.00, desc:'Queijo, charque, azeitona e orégano',                 ic:'🍕' },
+    { id:'pg10', nome:'Frango c/ Catupiry G',  preco:61.00, desc:'Frango, queijo, azeitona e orégano',                  ic:'🍕' },
+    { id:'pg11', nome:'Atum G',                preco:57.00, desc:'Queijo, azeitona e orégano',                          ic:'🍕' },
+    { id:'pg12', nome:'Três Queijos G',        preco:59.00, desc:'Queijo, parmesão, requeijão, azeitona e orégano',     ic:'🍕' },
+    { id:'pg13', nome:'Portuguesa G',          preco:57.00, desc:'Presunto, requeijão, ovo, cebola, queijo e azeitona', ic:'🍕' },
+    { id:'pg14', nome:'Bacalhau G',            preco:64.00, desc:'Queijo, requeijão, cebola, azeitona e orégano',       ic:'🍕' },
+    { id:'pg15', nome:'Charque c/ Catupiry G', preco:63.00, desc:'Queijo, charque, azeitona e orégano',                 ic:'🍕' },
+    { id:'pg16', nome:'Carne de Sol G',        preco:62.00, desc:'Queijo, carne de sol, azeitona e orégano',            ic:'🍕' },
+    { id:'pg17', nome:'À Moda da Casa G',      preco:64.00, desc:'Carne de sol, portuguesa, provolone, cebola, queijo', ic:'🍕' },
+  ],
+  pizzam: [
+    { id:'pm1',  nome:'Mussarela M',           preco:42.00, desc:'Tomate, azeitona e orégano',                          ic:'🍕' },
+    { id:'pm2',  nome:'Chester M',             preco:44.00, desc:'Queijo, azeitona e orégano',                          ic:'🍕' },
+    { id:'pm3',  nome:'Calabresa M',           preco:46.00, desc:'Queijo, cebola, azeitona e orégano',                  ic:'🍕' },
+    { id:'pm4',  nome:'Presunto M',            preco:44.00, desc:'Queijo, tomate, azeitona e orégano',                  ic:'🍕' },
+    { id:'pm5',  nome:'Salaminho M',           preco:47.00, desc:'Tomate, azeitona e orégano',                          ic:'🍕' },
+    { id:'pm6',  nome:'Provolone M',           preco:47.00, desc:'Queijo, tomate, azeitona e orégano',                  ic:'🍕' },
+    { id:'pm7',  nome:'Bacon M',               preco:48.00, desc:'Queijo, cebola, azeitona e orégano',                  ic:'🍕' },
+    { id:'pm8',  nome:'Frango M',              preco:50.00, desc:'Queijo, azeitona e orégano',                          ic:'🍕' },
+    { id:'pm9',  nome:'Sertaneja M',           preco:54.00, desc:'Queijo, charque, azeitona e orégano',                 ic:'🍕' },
+    { id:'pm10', nome:'Frango c/ Catupiry M',  preco:52.00, desc:'Frango, queijo, azeitona e orégano',                  ic:'🍕' },
+    { id:'pm11', nome:'Atum M',                preco:51.00, desc:'Queijo, azeitona e orégano',                          ic:'🍕' },
+    { id:'pm12', nome:'Três Queijos M',        preco:51.00, desc:'Queijo, parmesão, requeijão, azeitona e orégano',     ic:'🍕' },
+    { id:'pm13', nome:'Portuguesa M',          preco:52.00, desc:'Presunto, requeijão, ovo, cebola, queijo e azeitona', ic:'🍕' },
+    { id:'pm14', nome:'Bacalhau M',            preco:54.00, desc:'Queijo, requeijão, cebola, azeitona e orégano',       ic:'🍕' },
+    { id:'pm15', nome:'Charque c/ Catupiry M', preco:56.00, desc:'Queijo, charque, azeitona e orégano',                 ic:'🍕' },
+    { id:'pm16', nome:'Carne de Sol M',        preco:55.00, desc:'Queijo, carne de sol, azeitona e orégano',            ic:'🍕' },
+    { id:'pm17', nome:'À Moda da Casa M',      preco:58.00, desc:'Carne de sol, portuguesa, provolone, cebola, queijo', ic:'🍕' },
+  ],
   petiscos: [
     { id:'pt1',  nome:'Picanha com Fritas',          preco:145.00, desc:'Vinagrete, batata frita e farofa',  ic:'🍟' },
     { id:'pt2',  nome:'Picanha de Cordeiro c/ Fritas',preco:140.00,desc:'Batata frita, vinagrete e farofa', ic:'🍟' },
@@ -193,12 +231,14 @@ async function enviarCategorias(phone) {
     '4️⃣ 🥗 Entradas\n' +
     '5️⃣ 🍱 Almoços (1 pessoa)\n' +
     '6️⃣ 🍱 Almoços (2 pessoas)\n' +
-    '7️⃣ 🍟 Petiscos'
+    '7️⃣ 🍟 Petiscos\n' +
+    '8️⃣ 🍕 Pizza Grande\n' +
+    '9️⃣ 🍕 Pizza Média'
   );
 }
 
 async function enviarItens(phone, cat) {
-  const nomes = { churrasco:'🥩 CHURRASCOS', aves:'🍗 AVES', file:'🍽️ FILÉ', entradas:'🥗 ENTRADAS', almoco1:'🍱 ALMOÇOS (1 pessoa)', almoco2:'🍱 ALMOÇOS (2 pessoas)', petiscos:'🍟 PETISCOS' };
+  const nomes = { churrasco:'🥩 CHURRASCOS', aves:'🍗 AVES', file:'🍽️ FILÉ', entradas:'🥗 ENTRADAS', almoco1:'🍱 ALMOÇOS (1 pessoa)', almoco2:'🍱 ALMOÇOS (2 pessoas)', petiscos:'🍟 PETISCOS', pizzag:'🍕 PIZZA GRANDE', pizzam:'🍕 PIZZA MÉDIA' };
   const itens = CARDAPIO[cat];
   const lista = itens.map((it,i)=>`${i+1}️⃣ *${it.nome}* — ${fmt(it.preco)}\n   ${it.desc}`).join('\n\n');
   await enviar(phone, `*${nomes[cat]}*\n\n${lista}\n\n${itens.length+1}️⃣ ⬅️ Outras categorias`);
@@ -333,7 +373,9 @@ async function processarMensagem(phone, texto) {
       else if (msg==='5') { s.catAtual='almoco1';   s.etapa='escolher_item'; await enviarItens(phone,'almoco1'); }
       else if (msg==='6') { s.catAtual='almoco2';   s.etapa='escolher_item'; await enviarItens(phone,'almoco2'); }
       else if (msg==='7') { s.catAtual='petiscos';  s.etapa='escolher_item'; await enviarItens(phone,'petiscos'); }
-      else { await enviar(phone,'❓ Digite um número de 1 a 7.'); await enviarCategorias(phone); }
+      else if (msg==='8') { s.catAtual='pizzag';    s.etapa='escolher_item'; await enviarItens(phone,'pizzag'); }
+      else if (msg==='9') { s.catAtual='pizzam';    s.etapa='escolher_item'; await enviarItens(phone,'pizzam'); }
+      else { await enviar(phone,'❓ Digite um número de 1 a 9.'); await enviarCategorias(phone); }
       break;
 
     /* ── Item ── */
@@ -360,7 +402,9 @@ async function processarMensagem(phone, texto) {
           `5️⃣ 🍱 Almoços (1 pessoa)\n` +
           `6️⃣ 🍱 Almoços (2 pessoas)\n` +
           `7️⃣ 🍟 Petiscos\n` +
-          `8️⃣ ✅ Finalizar pedido`
+          `8️⃣ 🍕 Pizza Grande\n` +
+          `9️⃣ 🍕 Pizza Média\n` +
+          `🔟 ✅ Finalizar pedido`
         );
       } else {
         await enviar(phone,'❓ Número inválido. Escolha um item da lista.');
@@ -378,11 +422,13 @@ async function processarMensagem(phone, texto) {
       else if (msg==='5') { s.catAtual='almoco1';   s.etapa='escolher_item'; await enviarItens(phone,'almoco1'); }
       else if (msg==='6') { s.catAtual='almoco2';   s.etapa='escolher_item'; await enviarItens(phone,'almoco2'); }
       else if (msg==='7') { s.catAtual='petiscos';  s.etapa='escolher_item'; await enviarItens(phone,'petiscos'); }
-      else if (msg==='8') {
+      else if (msg==='8') { s.catAtual='pizzag';    s.etapa='escolher_item'; await enviarItens(phone,'pizzag'); }
+      else if (msg==='9') { s.catAtual='pizzam';    s.etapa='escolher_item'; await enviarItens(phone,'pizzam'); }
+      else if (msg==='10') {
         s.etapa = 'aguardando_nome';
         await enviar(phone,'Ótimo! 😄\n\nAgora me diz: qual é o seu *nome completo*?');
       }
-      else { await enviar(phone,'❓ Digite um número de 1 a 8.'); }
+      else { await enviar(phone,'❓ Digite um número de 1 a 10.'); }
       break;
 
     /* ── Nome ── */
