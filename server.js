@@ -279,7 +279,7 @@ async function processarMensagem(phone, texto) {
         );
         await enviarMenu(phone);
       } else if (msg==='3') {
-        await enviar(phone,'⏰ *Horário de Funcionamento*\n\nSeg – Sex: 11h às 23h\nSáb e Dom: 11h à meia-noite\n\nEstamos abertos todos os dias! 🎉');
+        await enviar(phone,'⏰ *Horário de Funcionamento*\n\nTodos os dias: 10h30 às 21h00\n\nEstamos abertos todos os dias! 🎉');
         await enviarMenu(phone);
       } else if (msg==='4') {
         await enviar(phone,'📍 *Onde nos encontrar*\n\nCabo de Santo Agostinho — PE\n📞 (81) 99219-4757\n\n🛵 Fazemos delivery em Cohab, São Francisco, Vila Social, Garapu e região!');
