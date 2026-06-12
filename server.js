@@ -15,14 +15,16 @@ app.use(express.static(path.join(__dirname)));
 /* ════════════════════════════════════════════
    CONFIG Z-API
 ════════════════════════════════════════════ */
-const INSTANCE  = process.env.ZAPI_INSTANCE;
-const TOKEN     = process.env.ZAPI_TOKEN;
-const CHAVE_PIX = process.env.CHAVE_PIX || '(81) 99219-4757';
-const ZAPI_BASE = `https://api.z-api.io/instances/${INSTANCE}/token/${TOKEN}`;
+const INSTANCE      = process.env.ZAPI_INSTANCE;
+const TOKEN         = process.env.ZAPI_TOKEN;
+const CLIENT_TOKEN  = process.env.ZAPI_CLIENT_TOKEN || '';
+const CHAVE_PIX     = process.env.CHAVE_PIX || '(81) 99219-4757';
+const ZAPI_BASE     = `https://api.z-api.io/instances/${INSTANCE}/token/${TOKEN}`;
 
 async function enviar(phone, message) {
   try {
-    await axios.post(`${ZAPI_BASE}/send-text`, { phone, message });
+    const headers = CLIENT_TOKEN ? { 'Client-Token': CLIENT_TOKEN } : {};
+    await axios.post(`${ZAPI_BASE}/send-text`, { phone, message }, { headers });
     console.log(`✉️  [${phone}] → "${message.slice(0, 60).replace(/\n/g,' ')}…"`);
   } catch (e) {
     console.error(`❌ Erro ao enviar para ${phone}:`, e.response?.data || e.message);
@@ -470,6 +472,8 @@ server.listen(PORT, () => {
   console.log(`📋 Dashboard:  http://localhost:${PORT}/`);
   console.log(`🔗 Webhook:    http://SEU_IP:${PORT}/webhook`);
   console.log(`\n📦 Z-API Instance: ${INSTANCE || '⚠️  NÃO CONFIGURADO'}`);
+  console.log(`🔑 Z-API Token:    ${TOKEN ? TOKEN.slice(0,6)+'…' : '⚠️  NÃO CONFIGURADO'}`);
+  console.log(`🔒 Client-Token:   ${CLIENT_TOKEN ? CLIENT_TOKEN.slice(0,6)+'…' : '(não configurado)'}`);
   console.log(`\n💡 Configure o webhook no painel Z-API!`);
   console.log('');
 });
