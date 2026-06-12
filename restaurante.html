@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Churrascaria & Pizzaria — Sistema</title>
+  <title>Delícias na Brasa — Sistema</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -34,40 +34,141 @@ const hora = () => new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:
 /* ─── DADOS ─── */
 const CARDAPIO = {
   churrasco:[
-    {id:'c1',nome:'Picanha na Brasa',     preco:89.90,desc:'400g com farofa e vinagrete',         ic:'🥩'},
-    {id:'c2',nome:'Costelinha Suína',     preco:72.00,desc:'350g temperada com ervas',             ic:'🍖'},
-    {id:'c3',nome:'Fraldinha Grelhada',  preco:67.50,desc:'300g com mandioca frita',              ic:'🔥'},
-    {id:'c4',nome:'Combo Família',        preco:199.00,desc:'1kg misto + 4 acompanhamentos',      ic:'🫕'},
+    {id:'c1', nome:'Mistão (Toscana/Galeto)', preco:128.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🥩'},
+    {id:'c2', nome:'Picanha Argentina',        preco:170.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🥩'},
+    {id:'c3', nome:'Picanha de Cordeiro',      preco:165.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🥩'},
+    {id:'c4', nome:'Cupim',                    preco:105.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🥩'},
+    {id:'c5', nome:'Maminha',                  preco:141.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🥩'},
+    {id:'c6', nome:'Churrasco de Filé',        preco:130.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🥩'},
+    {id:'c7', nome:'Carne de Sol do Cordeiro', preco:127.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🥩'},
+    {id:'c8', nome:'Costela Bovina',           preco:102.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🥩'},
+    {id:'c9', nome:'Carne de Sol',             preco:105.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🥩'},
+    {id:'c10',nome:'Churrasco Gaúcho',         preco:105.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🥩'},
+    {id:'c11',nome:'Costela de Bode',          preco:100.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🥩'},
+    {id:'c12',nome:'Picanha Suína',            preco:95.00, desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🥩'},
   ],
-  pizza:[
-    {id:'p1',nome:'Calabresa',            preco:52.00,desc:'Molho, mozzarella, calabresa, cebola',ic:'🍕'},
-    {id:'p2',nome:'Frango c/ Catupiry',   preco:58.00,desc:'Mozzarella, frango, catupiry',        ic:'🐔'},
-    {id:'p3',nome:'Portuguesa',           preco:55.00,desc:'Ovo, presunto, azeitona, mozzarella', ic:'🫒'},
-    {id:'p4',nome:'Quatro Queijos',       preco:62.00,desc:'Mozz, gorgonzola, provolone, parmesão',ic:'🧀'},
-    {id:'p5',nome:'Margherita',           preco:48.00,desc:'Molho fresco, búfala, manjericão',    ic:'🌿'},
+  aves:[
+    {id:'a1',nome:'Frango à Moda da Casa', preco:80.00,desc:'Arroz, feijão, vinagrete e maionese',         ic:'🍗'},
+    {id:'a2',nome:'Galeto',                preco:75.00,desc:'Arroz, feijão, batata, vinagrete e maionese', ic:'🍗'},
+    {id:'a3',nome:'Galeto Simples',        preco:52.00,desc:'Batata, vinagrete e farofa',                  ic:'🍗'},
+    {id:'a4',nome:'1/2 Galeto Simples',    preco:41.00,desc:'Batata, vinagrete e farofa',                  ic:'🍗'},
   ],
-  bebidas:[
-    {id:'b1',nome:'Refrigerante 2L',      preco:12.00,desc:'Coca, Guaraná ou Laranja',            ic:'🥤'},
-    {id:'b2',nome:'Suco Natural 500ml',   preco:14.00,desc:'Maracujá, Laranja ou Limão',          ic:'🍊'},
-    {id:'b3',nome:'Cerveja Long Neck',    preco:10.00,desc:'Heineken, Brahma ou Itaipava',         ic:'🍺'},
-    {id:'b4',nome:'Água Mineral 500ml',   preco:5.00, desc:'Com ou sem gás',                      ic:'💧'},
+  file:[
+    {id:'f1',nome:'Filé à Moda da Casa',   preco:130.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍽️'},
+    {id:'f2',nome:'Filé à Parmegiana',     preco:125.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍽️'},
+    {id:'f3',nome:'Filé à Parmegiana 1/2', preco:120.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍽️'},
+  ],
+  entradas:[
+    {id:'e1',nome:'Frango à Passarinho',        preco:45.00,desc:'Porção de frango à passarinho',         ic:'🍗'},
+    {id:'e2',nome:'Salaminho c/ Queijo',         preco:30.00,desc:'Prato ou mussarela',                   ic:'🧀'},
+    {id:'e3',nome:'Porção de Fritas',            preco:17.00,desc:'Batata frita crocante',                ic:'🍟'},
+    {id:'e4',nome:'Toscana de Bode (unid.)',     preco:8.00, desc:'Unidade de toscana de bode',           ic:'🌭'},
+    {id:'e5',nome:'Toscana Frango/Porco (unid.)',preco:5.00, desc:'Unidade de toscana de frango ou porco',ic:'🌭'},
+  ],
+  almoco1:[
+    {id:'al1',nome:'Comercial Picanha c/ fritas',preco:54.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍱'},
+    {id:'al2',nome:'Comercial Picanha',           preco:52.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍱'},
+    {id:'al3',nome:'Comercial Maminha',           preco:46.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍱'},
+    {id:'al4',nome:'Comercial de Carne',          preco:44.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍱'},
+    {id:'al5',nome:'Comercial Carne simples',     preco:33.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍱'},
+    {id:'al6',nome:'Comercial Picanha simples',   preco:29.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍱'},
+    {id:'al7',nome:'Comercial Galeto',            preco:29.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍱'},
+    {id:'al8',nome:'Comercial Toscana',           preco:29.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍱'},
+  ],
+  almoco2:[
+    {id:'am1', nome:'1/2 Picanha Argentina', preco:140.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍱'},
+    {id:'am2', nome:'1/2 Picanha de Cordeiro',preco:129.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍱'},
+    {id:'am3', nome:'1/2 Churrasco Gaúcho',  preco:85.00, desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍱'},
+    {id:'am4', nome:'1/2 Maminha',           preco:107.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍱'},
+    {id:'am5', nome:'1/2 Mistão',            preco:90.00, desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍱'},
+    {id:'am6', nome:'1/2 Carne de Sol',      preco:83.00, desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍱'},
+    {id:'am7', nome:'1/2 Carne de Cordeiro', preco:105.00,desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍱'},
+    {id:'am8', nome:'1/2 Cupim',             preco:80.00, desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍱'},
+    {id:'am9', nome:'1/2 Costela de Bode',   preco:77.00, desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍱'},
+    {id:'am10',nome:'1/2 Costela Bovina',    preco:75.00, desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍱'},
+    {id:'am11',nome:'1/2 Picanha Suína',     preco:75.00, desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍱'},
+    {id:'am12',nome:'1/2 Galeto',            preco:55.00, desc:'Feijão tropeiro ou caseiro, arroz, batata',ic:'🍱'},
+  ],
+  petiscos:[
+    {id:'pt1', nome:'Picanha com Fritas',           preco:145.00,desc:'Vinagrete, batata frita e farofa', ic:'🍟'},
+    {id:'pt2', nome:'Picanha de Cordeiro c/ Fritas', preco:140.00,desc:'Batata frita, vinagrete e farofa',ic:'🍟'},
+    {id:'pt3', nome:'Mistão Simples c/ Fritas',     preco:108.00,desc:'Batata frita, vinagrete e farofa', ic:'🍟'},
+    {id:'pt4', nome:'Maminha com Fritas',           preco:112.00,desc:'Vinagrete, batata frita e farofa', ic:'🍟'},
+    {id:'pt5', nome:'Churrasco de Filé c/ Fritas',  preco:108.00,desc:'Batata frita, vinagrete e farofa', ic:'🍟'},
+    {id:'pt6', nome:'1/2 Picanha Simples c/ Fritas',preco:110.00,desc:'Vinagrete, batata frita e farofa', ic:'🍟'},
+    {id:'pt7', nome:'Carne de Sol Cord. c/ Fritas', preco:105.00,desc:'Vinagrete, batata frita e farofa', ic:'🍟'},
+    {id:'pt8', nome:'1/2 Maminha com Fritas',       preco:86.00, desc:'Vinagrete, batata frita e farofa', ic:'🍟'},
+    {id:'pt9', nome:'Cupim com Fritas',             preco:82.00, desc:'Vinagrete, batata frita e farofa', ic:'🍟'},
+    {id:'pt10',nome:'Costela Bovina c/ Fritas',     preco:80.00, desc:'Batata frita, vinagrete e farofa', ic:'🍟'},
+    {id:'pt11',nome:'Carne de Sol com Fritas',      preco:80.00, desc:'Batata frita, vinagrete e farofa', ic:'🍟'},
+    {id:'pt12',nome:'Costela de Bode c/ Fritas',    preco:77.00, desc:'Batata frita, vinagrete e farofa', ic:'🍟'},
+    {id:'pt13',nome:'Picanha Suína com Fritas',     preco:73.00, desc:'Batata frita, vinagrete e farofa', ic:'🍟'},
+    {id:'pt14',nome:'1/2 Carne de Sol c/ Fritas',   preco:65.00, desc:'Vinagrete, batata frita e farofa', ic:'🍟'},
+    {id:'pt15',nome:'Comercial de Maminha',         preco:39.00, desc:'Batata frita, vinagrete e farofa', ic:'🍟'},
+    {id:'pt16',nome:'Comercial de Carne',           preco:25.00, desc:'Batata frita, vinagrete e farofa', ic:'🍟'},
+  ],
+  pizzag:[
+    {id:'pg1', nome:'Mussarela G',          preco:50.00,desc:'Tomate, azeitona e orégano',                        ic:'🍕'},
+    {id:'pg2', nome:'Chester G',            preco:52.00,desc:'Queijo, azeitona e orégano',                        ic:'🍕'},
+    {id:'pg3', nome:'Calabresa G',          preco:55.00,desc:'Queijo, cebola, azeitona e orégano',                ic:'🍕'},
+    {id:'pg4', nome:'Presunto G',           preco:52.00,desc:'Queijo, tomate, azeitona e orégano',                ic:'🍕'},
+    {id:'pg5', nome:'Salaminho G',          preco:54.00,desc:'Tomate, azeitona e orégano',                        ic:'🍕'},
+    {id:'pg6', nome:'Provolone G',          preco:56.00,desc:'Queijo, tomate, azeitona e orégano',                ic:'🍕'},
+    {id:'pg7', nome:'Bacon G',              preco:58.00,desc:'Queijo, cebola, azeitona e orégano',                ic:'🍕'},
+    {id:'pg8', nome:'Frango G',             preco:59.00,desc:'Queijo, azeitona e orégano',                        ic:'🍕'},
+    {id:'pg9', nome:'Sertaneja G',          preco:62.00,desc:'Queijo, charque, azeitona e orégano',               ic:'🍕'},
+    {id:'pg10',nome:'Frango c/ Catupiry G', preco:61.00,desc:'Frango, queijo, azeitona e orégano',                ic:'🍕'},
+    {id:'pg11',nome:'Atum G',               preco:57.00,desc:'Queijo, azeitona e orégano',                        ic:'🍕'},
+    {id:'pg12',nome:'Três Queijos G',       preco:59.00,desc:'Queijo, parmesão, requeijão, azeitona e orégano',   ic:'🍕'},
+    {id:'pg13',nome:'Portuguesa G',         preco:57.00,desc:'Presunto, requeijão, ovo, cebola, queijo, azeitona',ic:'🍕'},
+    {id:'pg14',nome:'Bacalhau G',           preco:64.00,desc:'Queijo, requeijão, cebola, azeitona e orégano',     ic:'🍕'},
+    {id:'pg15',nome:'Charque c/ Catupiry G',preco:63.00,desc:'Queijo, charque, azeitona e orégano',               ic:'🍕'},
+    {id:'pg16',nome:'Carne de Sol G',       preco:62.00,desc:'Queijo, carne de sol, azeitona e orégano',          ic:'🍕'},
+    {id:'pg17',nome:'À Moda da Casa G',     preco:64.00,desc:'Carne de sol, portuguesa, provolone, cebola',       ic:'🍕'},
+  ],
+  pizzam:[
+    {id:'pm1', nome:'Mussarela M',          preco:42.00,desc:'Tomate, azeitona e orégano',                        ic:'🍕'},
+    {id:'pm2', nome:'Chester M',            preco:44.00,desc:'Queijo, azeitona e orégano',                        ic:'🍕'},
+    {id:'pm3', nome:'Calabresa M',          preco:46.00,desc:'Queijo, cebola, azeitona e orégano',                ic:'🍕'},
+    {id:'pm4', nome:'Presunto M',           preco:44.00,desc:'Queijo, tomate, azeitona e orégano',                ic:'🍕'},
+    {id:'pm5', nome:'Salaminho M',          preco:47.00,desc:'Tomate, azeitona e orégano',                        ic:'🍕'},
+    {id:'pm6', nome:'Provolone M',          preco:47.00,desc:'Queijo, tomate, azeitona e orégano',                ic:'🍕'},
+    {id:'pm7', nome:'Bacon M',              preco:48.00,desc:'Queijo, cebola, azeitona e orégano',                ic:'🍕'},
+    {id:'pm8', nome:'Frango M',             preco:50.00,desc:'Queijo, azeitona e orégano',                        ic:'🍕'},
+    {id:'pm9', nome:'Sertaneja M',          preco:54.00,desc:'Queijo, charque, azeitona e orégano',               ic:'🍕'},
+    {id:'pm10',nome:'Frango c/ Catupiry M', preco:52.00,desc:'Frango, queijo, azeitona e orégano',                ic:'🍕'},
+    {id:'pm11',nome:'Atum M',               preco:51.00,desc:'Queijo, azeitona e orégano',                        ic:'🍕'},
+    {id:'pm12',nome:'Três Queijos M',       preco:51.00,desc:'Queijo, parmesão, requeijão, azeitona e orégano',   ic:'🍕'},
+    {id:'pm13',nome:'Portuguesa M',         preco:52.00,desc:'Presunto, requeijão, ovo, cebola, queijo, azeitona',ic:'🍕'},
+    {id:'pm14',nome:'Bacalhau M',           preco:54.00,desc:'Queijo, requeijão, cebola, azeitona e orégano',     ic:'🍕'},
+    {id:'pm15',nome:'Charque c/ Catupiry M',preco:56.00,desc:'Queijo, charque, azeitona e orégano',               ic:'🍕'},
+    {id:'pm16',nome:'Carne de Sol M',       preco:55.00,desc:'Queijo, carne de sol, azeitona e orégano',          ic:'🍕'},
+    {id:'pm17',nome:'À Moda da Casa M',     preco:58.00,desc:'Carne de sol, portuguesa, provolone, cebola',       ic:'🍕'},
   ],
 };
 
 const BAIRROS = [
-  {nome:'Centro',         taxa:5.00, tempo:'30–40 min'},
-  {nome:'Boa Viagem',     taxa:7.00, tempo:'35–45 min'},
-  {nome:'Afogados',       taxa:7.00, tempo:'35–45 min'},
-  {nome:'Imbiribeira',    taxa:8.00, tempo:'40–50 min'},
-  {nome:'Ibura',          taxa:10.00,tempo:'45–55 min'},
-  {nome:'Outro bairro',   taxa:8.00, tempo:'40–50 min'},
+  {nome:'Santo Inácio',         taxa:7.00, tempo:'30–50 min'},
+  {nome:'Cohab',                taxa:7.00, tempo:'30–50 min'},
+  {nome:'Bairro São Francisco', taxa:8.00, tempo:'30–50 min'},
+  {nome:'Charnequinha',         taxa:8.00, tempo:'30–50 min'},
+  {nome:'Centro do Cabo',       taxa:8.00, tempo:'30–50 min'},
+  {nome:'Vila Claudete',        taxa:7.00, tempo:'30–50 min'},
+  {nome:'Garapu',               taxa:7.00, tempo:'30–50 min'},
+  {nome:'Garapu 2 (Shopping)',  taxa:8.00, tempo:'30–50 min'},
+  {nome:'Malaquias',            taxa:8.00, tempo:'30–50 min'},
+  {nome:'Torrinha',             taxa:8.00, tempo:'30–50 min'},
+  {nome:'Bela Vista',           taxa:8.00, tempo:'30–50 min'},
+  {nome:'Charneca',             taxa:12.00,tempo:'40–60 min'},
+  {nome:'Pirapama',             taxa:12.00,tempo:'40–60 min'},
 ];
 
 const PGTOS = [
-  {label:'PIX',           ic:'⚡',key:'pix'},
-  {label:'Dinheiro',      ic:'💵',key:'dinheiro'},
-  {label:'Cartão Débito', ic:'💳',key:'debito'},
-  {label:'Cartão Crédito',ic:'💳',key:'credito'},
+  {label:'PIX',              ic:'⚡',key:'pix'},
+  {label:'Dinheiro',         ic:'💵',key:'dinheiro'},
+  {label:'Cartão Crédito',   ic:'💳',key:'credito'},
+  {label:'Cartão Débito',    ic:'💳',key:'debito'},
+  {label:'Vale Alimentação', ic:'🍽️',key:'vale'},
 ];
 
 const STATUS = {
@@ -77,13 +178,7 @@ const STATUS = {
   entregue:  {label:'Entregue',   bg:'bg-slate-100', tx:'text-slate-500', dot:'bg-slate-400'},
 };
 
-const PEDIDOS_DEMO = [
-  {id:1,cliente:'João Silva',  itens:['Picanha na Brasa','Refrigerante 2L'],       total:101.90,status:'pronto',    hora:'11:32',tipo:'churrasco',entrega:'Delivery',bairro:'Centro',pgto:'PIX'},
-  {id:2,cliente:'Maria Souza', itens:['Pizza Calabresa','Cerveja Long Neck'],       total:62.00, status:'preparo',   hora:'11:45',tipo:'pizza',    entrega:'Delivery',bairro:'Boa Viagem',pgto:'Cartão Débito'},
-  {id:3,cliente:'Carlos Lima', itens:['Combo Família','Suco Natural 500ml'],        total:213.00,status:'aguardando',hora:'11:58',tipo:'churrasco',entrega:'Retirada', bairro:'',pgto:'Dinheiro'},
-  {id:4,cliente:'Ana Ferreira',itens:['Pizza Quatro Queijos'],                      total:62.00, status:'entregue',  hora:'11:15',tipo:'pizza',    entrega:'Retirada', bairro:'',pgto:'PIX'},
-  {id:5,cliente:'Pedro Rocha', itens:['Fraldinha Grelhada','Água Mineral 500ml'],   total:72.50, status:'pronto',    hora:'12:02',tipo:'churrasco',entrega:'Delivery',bairro:'Afogados',pgto:'PIX'},
-];
+const PEDIDOS_DEMO = [];
 
 /* ─── ÍCONES SVG ─── */
 const Ic = {
@@ -206,25 +301,37 @@ function Dashboard({pedidos,onStatus}){
 function Cardapio(){
   const [cat,setCat]=useState('churrasco');
   const cats=[
-    {k:'churrasco',l:'Churrasco',IC:Ic.Grill},
-    {k:'pizza',    l:'Pizza',    IC:Ic.Pizza},
-    {k:'bebidas',  l:'Bebidas',  IC:Ic.Clip},
+    {k:'churrasco',l:'Churrascos',   ic:'🥩'},
+    {k:'aves',     l:'Aves',         ic:'🍗'},
+    {k:'file',     l:'Filé',         ic:'🍽️'},
+    {k:'entradas', l:'Entradas',     ic:'🥗'},
+    {k:'almoco1',  l:'Almoços (1p)', ic:'🍱'},
+    {k:'almoco2',  l:'Almoços (2p)', ic:'🍱'},
+    {k:'petiscos', l:'Petiscos',     ic:'🍟'},
+    {k:'pizzag',   l:'Pizza Grande', ic:'🍕'},
+    {k:'pizzam',   l:'Pizza Média',  ic:'🍕'},
   ];
-  const cores={churrasco:'border-orange-200 bg-orange-50',pizza:'border-red-200 bg-red-50',bebidas:'border-sky-200 bg-sky-50'};
+  const cor = k=>{
+    if(k.startsWith('pizza')) return 'border-red-200 bg-red-50';
+    if(k==='aves'||k==='entradas') return 'border-amber-200 bg-amber-50';
+    if(k==='petiscos') return 'border-yellow-200 bg-yellow-50';
+    if(k.startsWith('almoco')) return 'border-green-200 bg-green-50';
+    return 'border-orange-200 bg-orange-50';
+  };
   return <div className="space-y-5">
-    <div className="flex gap-2 bg-white rounded-2xl p-1.5 shadow-sm border border-slate-100 w-fit">
-      {cats.map(({k,l,IC})=><button key={k} onClick={()=>setCat(k)}
-        className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${cat===k?'bg-orange-500 text-white shadow':'text-slate-500 hover:text-orange-500'}`}>
-        <IC className="w-4 h-4"/>{l}
+    <div className="flex flex-wrap gap-2">
+      {cats.map(({k,l,ic})=><button key={k} onClick={()=>setCat(k)}
+        className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-all border ${cat===k?'bg-orange-500 text-white border-orange-500 shadow':'bg-white text-slate-500 border-slate-200 hover:border-orange-300 hover:text-orange-500'}`}>
+        <span>{ic}</span>{l}
       </button>)}
     </div>
     <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
-      {CARDAPIO[cat].map(it=><div key={it.id} className={`bg-white rounded-2xl border shadow-sm p-5 flex gap-4 items-center hover:shadow-md transition-shadow ${cores[cat]}`}>
-        <div className={`w-14 h-14 rounded-xl border flex items-center justify-center text-3xl shrink-0 ${cores[cat]}`}>{it.ic}</div>
+      {CARDAPIO[cat].map(it=><div key={it.id} className={`bg-white rounded-2xl border shadow-sm p-4 flex gap-3 items-center hover:shadow-md transition-shadow ${cor(cat)}`}>
+        <div className={`w-12 h-12 rounded-xl border flex items-center justify-center text-2xl shrink-0 ${cor(cat)}`}>{it.ic}</div>
         <div className="min-w-0">
           <p className="font-semibold text-slate-800 text-sm">{it.nome}</p>
-          <p className="text-xs text-slate-400 mt-0.5">{it.desc}</p>
-          <p className="text-orange-600 font-bold mt-2">{fmt(it.preco)}</p>
+          <p className="text-xs text-slate-400 mt-0.5 leading-snug">{it.desc}</p>
+          <p className="text-orange-600 font-bold mt-1.5">{fmt(it.preco)}</p>
         </div>
       </div>)}
     </div>
@@ -297,44 +404,33 @@ function ChatBot({onNovoPedido}){
   const verCardapio = useCallback(async()=>{
     user('📋 Ver cardápio completo');
     await delay(300);
-    const linhas = cat => CARDAPIO[cat].map(i=>`${i.ic} *${i.nome}* — ${fmt(i.preco)}\n   ${i.desc}`).join('\n');
-    bot(`*📋 Cardápio Completo*\n\n*🥩 CHURRASCO*\n${linhas('churrasco')}\n\n*🍕 PIZZA*\n${linhas('pizza')}\n\n*🥤 BEBIDAS*\n${linhas('bebidas')}`,
+    const linhas = cat => CARDAPIO[cat].map(i=>`${i.ic} *${i.nome}* — ${fmt(i.preco)}`).join('\n');
+    bot(`*📋 Cardápio Completo*\n\n*🥩 CHURRASCOS*\n${linhas('churrasco')}\n\n*🍗 AVES*\n${linhas('aves')}\n\n*🍽️ FILÉ*\n${linhas('file')}\n\n*🥗 ENTRADAS*\n${linhas('entradas')}\n\n*🍱 ALMOÇOS (1p)*\n${linhas('almoco1')}\n\n*🍱 ALMOÇOS (2p)*\n${linhas('almoco2')}\n\n*🍟 PETISCOS*\n${linhas('petiscos')}\n\n*🍕 PIZZA GRANDE*\n${linhas('pizzag')}\n\n*🍕 PIZZA MÉDIA*\n${linhas('pizzam')}`,
       [{l:'🛒 Quero fazer um pedido!',fn:()=>fluxoPedido()},{l:'🏠 Voltar',fn:()=>iniciar()}]);
   },[]);
 
   const verHorario = useCallback(async()=>{
     user('🕐 Horário de funcionamento');
     await delay(300);
-    bot('*⏰ Horário de Funcionamento*\n\nSeg a Sex: 11h às 23h\nSáb e Dom: 11h à meia-noite\n\nEstamos abertos todos os dias! 🎉',
+    bot('*⏰ Horário de Funcionamento*\n\nTodos os dias: 10h30 às 21h00\n\nEstamos abertos todos os dias! 🎉',
       [{l:'🛒 Fazer pedido',fn:()=>fluxoPedido()},{l:'🏠 Voltar',fn:()=>iniciar()}]);
   },[]);
 
   const verEndereco = useCallback(async()=>{
     user('📍 Endereço / Localização');
     await delay(300);
-    bot('*📍 Onde nos encontrar*\n\nRua das Brasas, 420 – Centro, Recife/PE\n📞 (81) 99219-4757\n📸 @churrascariadoze\n\n🛵 Fazemos delivery para vários bairros!',
+    bot('*📍 Onde nos encontrar*\n\nCabo de Santo Agostinho — PE\n📞 (81) 99219-4757\n\n🛵 Delivery: Cohab, São Francisco, Vila Claudete, Garapu, Malaquias, Torrinha, Bela Vista, Charneca, Pirapama e região!',
       [{l:'🛒 Fazer pedido',fn:()=>fluxoPedido()},{l:'🏠 Voltar',fn:()=>iniciar()}]);
   },[]);
 
   /* ══ FLUXO DO PEDIDO ══ */
   const fluxoPedido = useCallback(async()=>{
-    const p = pedidoRef.current;
-
-    /* 1. Nome */
     user('🛒 Fazer um pedido');
     await delay(300);
-    bot('Ótimo! 😄 Vamos montar seu pedido!\n\nPrimeiro, qual é o seu *nome completo*?');
-    const nome = await askInput('Seu nome completo…');
-    p.nome = nome;
-    user(nome);
-
-    /* 2. Tipo de entrega */
-    await delay(300);
-    bot(`Perfeito, *${nome}*! 👍\n\nVocê prefere *delivery* ou vai *retirar* no local?`,[
-      {l:'🛵 Delivery (entrega em casa)',fn:()=>escolherBairro()},
-      {l:'🏃 Retirada no local',         fn:()=>{ p.entrega='Retirada'; user('🏃 Retirada no local'); escolherCategoria(); }},
-    ]);
-  },[askInput]);
+    bot('Ótimo! 😄 Vamos montar seu pedido!\n\nEscolha uma categoria:');
+    await delay(200);
+    escolherCategoria();
+  },[]);
 
   /* ── Bairro ── */
   const escolherBairro = useCallback(async()=>{
@@ -361,19 +457,24 @@ function ChatBot({onNovoPedido}){
   const escolherCategoria = useCallback(async()=>{
     await delay(200);
     bot('O que você vai querer hoje? 😋',[
-      {l:'🥩 Churrasco',fn:()=>listarItens('churrasco')},
-      {l:'🍕 Pizza',    fn:()=>listarItens('pizza')},
-      {l:'🥤 Bebidas',  fn:()=>listarItens('bebidas')},
+      {l:'🥩 Churrascos',      fn:()=>listarItens('churrasco','🥩 Churrascos')},
+      {l:'🍗 Aves',            fn:()=>listarItens('aves','🍗 Aves')},
+      {l:'🍽️ Filé',           fn:()=>listarItens('file','🍽️ Filé')},
+      {l:'🥗 Entradas',        fn:()=>listarItens('entradas','🥗 Entradas')},
+      {l:'🍱 Almoços (1p)',    fn:()=>listarItens('almoco1','🍱 Almoços (1 pessoa)')},
+      {l:'🍱 Almoços (2p)',    fn:()=>listarItens('almoco2','🍱 Almoços (2 pessoas)')},
+      {l:'🍟 Petiscos',        fn:()=>listarItens('petiscos','🍟 Petiscos')},
+      {l:'🍕 Pizza Grande',    fn:()=>listarItens('pizzag','🍕 Pizza Grande')},
+      {l:'🍕 Pizza Média',     fn:()=>listarItens('pizzam','🍕 Pizza Média')},
     ]);
   },[]);
 
   /* ── Listar itens ── */
-  const listarItens = useCallback(async(cat)=>{
-    const nomes={churrasco:'🥩 Churrasco',pizza:'🍕 Pizza',bebidas:'🥤 Bebidas'};
-    user(nomes[cat]);
+  const listarItens = useCallback(async(cat,label)=>{
+    user(label);
     await delay(300);
     const itens = CARDAPIO[cat];
-    bot(`*${nomes[cat]}* — toque para adicionar ao pedido:`,[
+    bot(`*${label}* — toque para adicionar:`,[
       ...itens.map(it=>({l:`${it.ic} ${it.nome} — ${fmt(it.preco)}`,fn:()=>adicionarItem(it)})),
       {l:'⬅️ Outras categorias',fn:()=>escolherCategoria()},
     ]);
@@ -388,12 +489,34 @@ function ChatBot({onNovoPedido}){
     const subtotal = p.carrinho.reduce((s,i)=>s+i.preco,0);
     const lista = p.carrinho.map(i=>`${i.ic} ${i.nome} — ${fmt(i.preco)}`).join('\n');
     bot(`Adicionado! ✅\n\n*Carrinho atual:*\n${lista}\n\n*Subtotal: ${fmt(subtotal)}*\n\nDeseja mais algum item?`,[
-      {l:'🥩 Mais churrasco',  fn:()=>listarItens('churrasco')},
-      {l:'🍕 Mais pizza',      fn:()=>listarItens('pizza')},
-      {l:'🥤 Bebidas',         fn:()=>listarItens('bebidas')},
-      {l:'✅ Finalizar pedido', fn:()=>escolherPagamento()},
+      {l:'🥩 Churrascos',      fn:()=>listarItens('churrasco','🥩 Churrascos')},
+      {l:'🍗 Aves',            fn:()=>listarItens('aves','🍗 Aves')},
+      {l:'🍽️ Filé',           fn:()=>listarItens('file','🍽️ Filé')},
+      {l:'🥗 Entradas',        fn:()=>listarItens('entradas','🥗 Entradas')},
+      {l:'🍱 Almoços (1p)',    fn:()=>listarItens('almoco1','🍱 Almoços (1 pessoa)')},
+      {l:'🍱 Almoços (2p)',    fn:()=>listarItens('almoco2','🍱 Almoços (2 pessoas)')},
+      {l:'🍟 Petiscos',        fn:()=>listarItens('petiscos','🍟 Petiscos')},
+      {l:'🍕 Pizza Grande',    fn:()=>listarItens('pizzag','🍕 Pizza Grande')},
+      {l:'🍕 Pizza Média',     fn:()=>listarItens('pizzam','🍕 Pizza Média')},
+      {l:'✅ Finalizar pedido', fn:()=>pedirNome()},
     ]);
   },[]);
+
+  /* ── Nome + Entrega ── */
+  const pedirNome = useCallback(async()=>{
+    user('✅ Finalizar pedido');
+    await delay(300);
+    bot('Ótimo! 😄\n\nQual é o seu *nome completo*?');
+    const nome = await askInput('Seu nome completo…');
+    const p = pedidoRef.current;
+    p.nome = nome;
+    user(nome);
+    await delay(300);
+    bot(`Perfeito, *${nome}*! 👍\n\nComo prefere receber seu pedido?`,[
+      {l:'🛵 Delivery (entrega em casa)', fn:()=>escolherBairro()},
+      {l:'🏃 Retirada no local',          fn:()=>{ p.entrega='Retirada'; user('🏃 Retirada no local'); escolherPagamento(); }},
+    ]);
+  },[askInput]);
 
   /* ── Pagamento ── */
   const escolherPagamento = useCallback(async()=>{
@@ -626,7 +749,7 @@ function App(){
           <Ic.Flame className="w-5 h-5 text-white"/>
         </div>
         <div className="min-w-0">
-          <h1 className="text-base font-bold leading-tight">Churrascaria &amp; Pizzaria do Zé</h1>
+          <h1 className="text-base font-bold leading-tight">🔥 Delícias na Brasa</h1>
           <div className="flex items-center gap-1.5">
             <span className={`w-1.5 h-1.5 rounded-full ${wsStatus==='ok'?'bg-emerald-400 pd':wsStatus==='erro'?'bg-red-400':'bg-yellow-400 pd'}`}/>
             <p className="text-xs text-orange-200">
